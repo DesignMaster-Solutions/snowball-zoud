@@ -55,5 +55,5 @@ lesson plan, original art and sound, and playtests with real learners.
 
 ## Team and tools
 
-Design Master Solutions LLC (Florida, USA), a software and design studio. HTML5 canvas and plain JavaScript, no engine,
+Design Master Solutions LLC (USA), a software and design studio. HTML5 canvas and plain JavaScript, no engine,
 runs in any browser. Code written with an AI assistant (Claude); design, balance and testing by us.

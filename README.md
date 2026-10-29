@@ -4,6 +4,8 @@ A financial literacy game for [Zoud GameLab](https://itch.io/jam/zoud-gamelab) (
 
 Play: https://designmaster-solutions.github.io/snowball-zoud/ (attract mode: `?autoplay`)
 
+For the jury: [concept doc](docs/CONCEPT.md) · [game budget](docs/BUDGET.md)
+
 ## The idea
 
 You ski down a mountain from age 22 to 67, seen from above, pushing your savings snowball ahead of you. Money left alone grows 6% a year, so the ball
