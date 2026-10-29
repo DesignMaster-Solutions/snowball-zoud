@@ -47,6 +47,7 @@ function spawnRow(y) {
   if (st.intro < INTRO.length) {
     const o = { ...INTRO[st.intro++], x: W / 2, y, w: 170, hit: false };
     if (o.kind === 'skill') o.w = 90;
+    if (o.kind === 'storm') st.stormYears = 0; // the taught storm counts, so a random one does not follow right behind
     objs.push(o);
     return;
   }
@@ -82,7 +83,7 @@ function money(k) {
 
 function update(dt) {
   if (phase !== 'play') return;
-  const teaching = objs.some(o => o.hint && !o.hit); // slow the slope while a hint is up, so it can be read
+  const teaching = objs.some(o => o.hint && !o.hit && o.y > ballY() - 40); // slow the slope while a hint is up, so it can be read
   const step = SPEED * dt * (teaching ? 0.4 : 1);
   dist += step;
   for (const f of flakes) { f.y -= step * (0.6 + f.r * 0.3); if (f.y < -5) { f.y = H + 5; f.x = Math.random() * W; } }
