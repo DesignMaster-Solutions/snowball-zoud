@@ -82,7 +82,8 @@ function money(k) {
 
 function update(dt) {
   if (phase !== 'play') return;
-  const step = SPEED * dt;
+  const teaching = objs.some(o => o.hint && !o.hit); // slow the slope while a hint is up, so it can be read
+  const step = SPEED * dt * (teaching ? 0.4 : 1);
   dist += step;
   for (const f of flakes) { f.y -= step * (0.6 + f.r * 0.3); if (f.y < -5) { f.y = H + 5; f.x = Math.random() * W; } }
   for (const t of trees) { t.y -= step; if (t.y < -60) Object.assign(t, sideTree(H + 40 + Math.random() * 80)); }
