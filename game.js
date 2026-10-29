@@ -21,6 +21,12 @@ const WANTS = [
   ['Concert', 1], ['New phone', 1.2], ['Weekend trip', 2], ['Dinner out', 0.5], ['Gaming PC', 2.5],
   ['Beach vacation', 4], ['Sneakers', 0.4], ['New car', 8], ['Wedding party', 6], ['Kitchen remodel', 5],
 ];
+// The first three rows teach by doing: one of each, with a hint riding next to it.
+const INTRO = [
+  { kind: 'skill', label: 'Learn a skill', amt: 0.5, hint: 'Ski through blue flags: you save more every year' },
+  { kind: 'want', label: 'Concert', cost: 1, hint: 'Gold gates are treats: joy now, a smaller snowball' },
+  { kind: 'storm', label: 'Car repair', cost: 2, hint: 'Savings pay for storms. What they cannot pay goes on a card at 24%' },
+];
 const STORMS = [['Car repair', 2], ['Medical bill', 3], ['Job loss', 6], ['Roof leak', 4], ['Vet bill', 1.5]];
 
 let st, life, objs, dist, nextYearAt, toasts, flakes, trees, trail, phase, steerX, keys = {};
@@ -31,13 +37,19 @@ function reset() {
   flakes = Array.from({ length: 70 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 1 + Math.random() * 2 }));
   trees = Array.from({ length: 14 }, () => sideTree(Math.random() * H));
   trail = [];
-  st = { x: W / 2, spawnAt: 120, stormYears: 0 };
+  st = { x: W / 2, spawnAt: 120, stormYears: 0, intro: 0 };
 }
 reset();
 
 // Content arrives in rows. Wants and skills sit in lanes you can steer into or around; storms span the slope.
 function spawnRow(y) {
   const lanes = [W * 0.2, W * 0.5, W * 0.8].sort(() => Math.random() - 0.5);
+  if (st.intro < INTRO.length) {
+    const o = { ...INTRO[st.intro++], x: W / 2, y, w: 170, hit: false };
+    if (o.kind === 'skill') o.w = 90;
+    objs.push(o);
+    return;
+  }
   const yearsLeft = E.END_AGE - life.age;
   if (yearsLeft > 1 && st.stormYears >= 4 && Math.random() < 0.45) {
     const [label, cost] = STORMS[Math.floor(Math.random() * STORMS.length)];
@@ -156,6 +168,7 @@ function draw() {
     if (o.kind === 'storm') {
       ctx.fillStyle = o.hit ? 'rgba(80,90,110,0.15)' : 'rgba(60,70,95,0.55)';
       ctx.fillRect(0, o.y - 28, W, 56);
+      if (o.hit) continue; // the toast already told the story; the label would scroll under the HUD
       ctx.fillStyle = '#fff'; ctx.font = 'bold 22px system-ui'; ctx.textAlign = 'center';
       ctx.fillText(`STORM  ${o.label}  ${money(o.cost)}  (can't dodge this one)`, W / 2, o.y + 8);
     } else if (o.kind === 'want') {
@@ -186,6 +199,7 @@ function draw() {
   ctx.fillStyle = '#18324a'; ctx.font = 'bold 15px system-ui'; ctx.textAlign = 'center';
   ctx.fillText(money(life.savings), st.x, BALL_Y + 5);
 
+  for (const o of objs) if (o.hint && !o.hit && o.y < H - 20) hint(o);
   hud();
   ctx.textAlign = 'center';
   toasts.forEach((t, i) => {
@@ -196,6 +210,13 @@ function draw() {
   });
   if (phase === 'title') titleCard();
   if (phase === 'end') endCard();
+}
+
+function hint(o) {
+  ctx.font = 'bold 16px system-ui'; ctx.textAlign = 'center';
+  const w = ctx.measureText(o.hint).width + 28, y = o.y + (o.kind === 'storm' ? 44 : 30);
+  ctx.fillStyle = 'rgba(255,255,255,0.92)'; roundRect(W / 2 - w / 2, y, w, 28, 14); ctx.fill();
+  ctx.fillStyle = '#18324a'; ctx.fillText(o.hint, W / 2, y + 19);
 }
 
 function hud() {
