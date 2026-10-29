@@ -1,6 +1,6 @@
 import * as E from './econ.js';
 
-const W = 960, H = 600, BALL_Y = 470;
+const W = 960, H = 600, SKIER_Y = 150; // top-down: you ski down, the slope scrolls up
 const YEAR_PX = 260;          // slope distance that equals one year of life
 const SPEED = 170;            // px per second, so a year is ~1.5 s and a life ~70 s
 const params = new URLSearchParams(location.search);
@@ -23,12 +23,14 @@ const WANTS = [
 ];
 const STORMS = [['Car repair', 2], ['Medical bill', 3], ['Job loss', 6], ['Roof leak', 4], ['Vet bill', 1.5]];
 
-let st, life, objs, dist, nextYearAt, toasts, flakes, phase, steerX, keys = {};
+let st, life, objs, dist, nextYearAt, toasts, flakes, trees, trail, phase, steerX, keys = {};
 
 function reset() {
   life = E.newLife(); objs = []; toasts = []; dist = 0; nextYearAt = YEAR_PX;
   steerX = W / 2; phase = 'title';
   flakes = Array.from({ length: 70 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 1 + Math.random() * 2 }));
+  trees = Array.from({ length: 14 }, () => sideTree(Math.random() * H));
+  trail = [];
   st = { x: W / 2, spawnAt: 120, stormYears: 0 };
 }
 reset();
@@ -45,12 +47,20 @@ function spawnRow(y) {
   }
   const [label, cost] = WANTS[Math.floor(Math.random() * WANTS.length)];
   objs.push({ kind: 'want', x: lanes[0], y, label, cost, w: 170, hit: false });
-  if (Math.random() < 0.3) objs.push({ kind: 'skill', x: lanes[1], y: y - 40, label: 'Learn a skill', amt: 0.5, w: 70, hit: false });
+  if (Math.random() < 0.3) objs.push({ kind: 'skill', x: lanes[1], y: y + 40, label: 'Learn a skill', amt: 0.5, w: 70, hit: false });
+}
+
+// Pines line both edges of the run; they are scenery, not obstacles.
+function sideTree(y) {
+  const left = Math.random() < 0.5;
+  return { x: left ? 15 + Math.random() * 70 : W - 85 + Math.random() * 70, y, s: 0.8 + Math.random() * 0.6 };
 }
 
 function toast(text, color) { toasts.push({ text, color, t: 0 }); }
 
 function ballR() { return 14 + Math.sqrt(Math.max(0, life.savings)) * 3.2; }
+// The skier pushes the snowball downhill, so the ball sits just below and touches things first.
+function ballY() { return SKIER_Y + 30 + ballR(); }
 
 function money(k) {
   const v = Math.abs(k);
@@ -62,7 +72,8 @@ function update(dt) {
   if (phase !== 'play') return;
   const step = SPEED * dt;
   dist += step;
-  for (const f of flakes) { f.y += step * (0.6 + f.r * 0.3); if (f.y > H) { f.y = -5; f.x = Math.random() * W; } }
+  for (const f of flakes) { f.y -= step * (0.6 + f.r * 0.3); if (f.y < -5) { f.y = H + 5; f.x = Math.random() * W; } }
+  for (const t of trees) { t.y -= step; if (t.y < -60) Object.assign(t, sideTree(H + 40 + Math.random() * 80)); }
 
   // Steering: pointer target, arrow keys, or the attract-mode pilot.
   if (keys.ArrowLeft || keys.a) steerX -= 520 * dt;
@@ -71,26 +82,29 @@ function update(dt) {
   steerX = Math.max(60, Math.min(W - 60, steerX));
   const drag = life.debt > 0 ? 0.35 : 1; // debt is a weight: the ball answers slower
   st.x += (steerX - st.x) * Math.min(1, dt * 6 * drag);
+  for (const p of trail) p.y -= step;
+  trail.push({ x: st.x, y: SKIER_Y + 12 });
+  trail = trail.filter(p => p.y > -10);
 
-  if (dist >= st.spawnAt) { spawnRow(-60); st.spawnAt += YEAR_PX * 0.75; }
-  for (const o of objs) o.y += step;
+  if (dist >= st.spawnAt) { spawnRow(H + 60); st.spawnAt += YEAR_PX * 0.75; }
+  for (const o of objs) o.y -= step;
 
-  const r = ballR();
+  const r = ballR(), by = ballY();
   for (const o of objs) {
     if (o.hit) continue;
-    if (o.kind === 'storm' && o.y >= BALL_Y) {
+    if (o.kind === 'storm' && o.y <= by) {
       o.hit = true;
       const before = life.savings;
       E.spend(life, o.cost, o.label, 'emergency');
       const borrowed = o.cost - Math.min(o.cost, before);
       toast(borrowed > 0 ? `${o.label} ${money(o.cost)}: ${money(borrowed)} on the card at 24%` : `${o.label} ${money(o.cost)}: covered by savings`, borrowed > 0 ? '#ff6b6b' : '#9be7a4');
-    } else if (o.kind !== 'storm' && Math.abs(o.y - BALL_Y) < r && Math.abs(o.x - st.x) < o.w / 2 + r * 0.6) {
+    } else if (o.kind !== 'storm' && Math.abs(o.y - by) < r && Math.abs(o.x - st.x) < o.w / 2 + r * 0.6) {
       o.hit = true;
       if (o.kind === 'want') { const j = E.treatJoy(life.mood); E.spend(life, o.cost, o.label); toast(`${o.label} ${money(-o.cost)}  +${j} joy`, '#ffd166'); }
       else { E.raise(life, o.amt); toast(`New skill: saving ${money(life.contribution)}/yr`, '#7cc6ff'); }
     }
   }
-  objs = objs.filter(o => o.y < H + 80);
+  objs = objs.filter(o => o.y > -80);
 
   if (dist >= nextYearAt) {
     nextYearAt += YEAR_PX;
@@ -105,7 +119,8 @@ function update(dt) {
 
 // Attract mode: treat yourself when mood runs low, catch skills, otherwise stay away from wants.
 function pilot() {
-  const ahead = objs.filter(o => !o.hit && o.kind !== 'storm' && o.y < BALL_Y && o.y > BALL_Y - 260);
+  const by = ballY();
+  const ahead = objs.filter(o => !o.hit && o.kind !== 'storm' && o.y > by && o.y < by + 260);
   const want = ahead.find(o => o.kind === 'want');
   const skill = ahead.find(o => o.kind === 'skill');
   if (skill) return skill.x;
@@ -122,10 +137,18 @@ function draw() {
   g.addColorStop(1, `hsl(205,${30 - gray * 20}%,${97 - gray * 8}%)`);
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
-  // ski tracks / year markers
+  // year markers scroll up with the slope
   ctx.strokeStyle = 'rgba(40,70,100,0.12)'; ctx.lineWidth = 2;
-  const off = dist % YEAR_PX;
-  for (let y = off - YEAR_PX; y < H; y += YEAR_PX) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  const off = YEAR_PX - (dist % YEAR_PX);
+  for (let y = off; y < H + YEAR_PX; y += YEAR_PX) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  // ski tracks left behind (above you)
+  ctx.strokeStyle = 'rgba(120,150,180,0.35)'; ctx.lineWidth = 2;
+  for (const d of [-6, 6]) {
+    ctx.beginPath();
+    trail.forEach((p, i) => i ? ctx.lineTo(p.x + d, p.y) : ctx.moveTo(p.x + d, p.y));
+    ctx.stroke();
+  }
+  for (const t of trees) pine(t.x, t.y, t.s);
   ctx.fillStyle = 'rgba(255,255,255,0.9)';
   for (const f of flakes) { ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 7); ctx.fill(); }
 
@@ -137,22 +160,24 @@ function draw() {
       ctx.fillText(`STORM  ${o.label}  ${money(o.cost)}  (can't dodge this one)`, W / 2, o.y + 8);
     } else if (o.kind === 'want') {
       if (o.hit) continue;
-      ctx.fillStyle = '#ffd166'; roundRect(o.x - o.w / 2, o.y - 22, o.w, 44, 10); ctx.fill();
-      ctx.fillStyle = '#3d2c00'; ctx.font = 'bold 17px system-ui'; ctx.textAlign = 'center';
+      flag(o.x - o.w / 2, o.y, '#f5b700'); flag(o.x + o.w / 2, o.y, '#f5b700');
+      ctx.fillStyle = 'rgba(255,209,102,0.9)'; roundRect(o.x - o.w / 2 + 12, o.y - 14, o.w - 24, 30, 4); ctx.fill();
+      ctx.fillStyle = '#3d2c00'; ctx.font = 'bold 15px ui-monospace, monospace'; ctx.textAlign = 'center';
       ctx.fillText(`${o.label} ${money(o.cost)}`, o.x, o.y + 6);
     } else if (!o.hit) {
-      ctx.fillStyle = '#7cc6ff'; ctx.beginPath(); ctx.arc(o.x, o.y, 22, 0, 7); ctx.fill();
-      ctx.fillStyle = '#05314f'; ctx.font = 'bold 13px system-ui'; ctx.textAlign = 'center';
+      flag(o.x - o.w / 2, o.y, '#2d8cf0'); flag(o.x + o.w / 2, o.y, '#2d8cf0');
+      ctx.fillStyle = '#05314f'; ctx.font = 'bold 13px ui-monospace, monospace'; ctx.textAlign = 'center';
       ctx.fillText('+skill', o.x, o.y + 5);
     }
   }
 
-  // the snowball, with a red chain when there is debt
-  const r = ballR();
+  // the skier pushing the snowball, with a red chain dragging behind when there is debt
+  const r = ballR(), BALL_Y = ballY();
   if (life.debt > 0) {
     ctx.strokeStyle = '#d64545'; ctx.lineWidth = 4; ctx.setLineDash([8, 6]);
-    ctx.beginPath(); ctx.moveTo(st.x, BALL_Y); ctx.lineTo(st.x, H); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(st.x, SKIER_Y); ctx.lineTo(st.x, 50); ctx.stroke(); ctx.setLineDash([]);
   }
+  skier(st.x, SKIER_Y, Math.max(-1, Math.min(1, (steerX - st.x) / 120)));
   const bg = ctx.createRadialGradient(st.x - r / 3, BALL_Y - r / 3, r / 5, st.x, BALL_Y, r);
   bg.addColorStop(0, '#ffffff'); bg.addColorStop(1, '#c9dcec');
   ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(st.x, BALL_Y, r, 0, 7); ctx.fill();
@@ -163,8 +188,8 @@ function draw() {
   ctx.textAlign = 'center';
   toasts.forEach((t, i) => {
     ctx.globalAlpha = Math.min(1, 2.6 - t.t);
-    ctx.fillStyle = 'rgba(14,26,36,0.8)'; roundRect(W / 2 - 290, 70 + i * 40, 580, 32, 8); ctx.fill();
-    ctx.fillStyle = t.color; ctx.font = 'bold 16px system-ui'; ctx.fillText(t.text, W / 2, 92 + i * 40);
+    ctx.fillStyle = 'rgba(14,26,36,0.8)'; roundRect(W / 2 - 290, H - 52 - i * 40, 580, 32, 8); ctx.fill();
+    ctx.fillStyle = t.color; ctx.font = 'bold 16px system-ui'; ctx.fillText(t.text, W / 2, H - 30 - i * 40);
     ctx.globalAlpha = 1;
   });
   if (phase === 'title') titleCard();
@@ -197,12 +222,13 @@ function panel(lines, foot) {
 function titleCard() {
   panel([
     ['SNOWBALL', 54, '#fff'],
-    ['Your savings roll downhill from age 22 to 67. Money left alone grows 6% a year.', 18],
-    ['Steer into gold treats to stay happy. Each one comes out of the snowball,', 18],
-    ['and a treat brings more joy when your mood is low, whatever it costs.', 18],
-    ['Catch blue skills to save more each year. Storms hit everyone:', 18],
-    ['savings cover them, or the rest goes on a card at 24%.', 18],
-    [`Score = joy along the way + reaching a ${money(E.GOAL)} nest egg at 67. Past the goal, money adds nothing.`, 17, '#ffd166'],
+    ['Ski from 22 down to 67, pushing your savings snowball. It grows 6% a year.', 18],
+    ['Gold gates are treats: they keep you happy and come out of the snowball.', 18],
+    ['A treat brings more joy when your mood is low, whatever it costs.', 18],
+    ['Blue flags are skills: they raise what you save each year.', 18],
+    ['Storms hit everyone: savings cover them, or the rest goes on a card at 24%.', 18],
+    [`Score = joy along the way + reaching a ${money(E.GOAL)} nest egg at 67.`, 18, '#ffd166'],
+    ['Past the goal, money adds nothing.', 18, '#ffd166'],
   ], 'Tap, click or press space to start · drag or arrows to steer');
 }
 
@@ -218,6 +244,31 @@ function endCard() {
     [`${money(p.fv)} of money at 67. Same treat at 60: ${money(E.futureValue(p.cost, 60))}.`, 18, '#7cc6ff']);
   lines.push(['Early money has the most years to grow. Late treats are cheap, early debt is expensive.', 16, '#bcd']);
   panel(lines, 'Tap to live it again');
+}
+
+// Pixel sprites, drawn from rects on a 4 px grid so they stay crisp at any scale.
+function px(x, y, cells, size, colors) {
+  cells.forEach((row, j) => [...row].forEach((c, i) => {
+    if (c === '.') return;
+    ctx.fillStyle = colors[c]; ctx.fillRect(Math.round(x + i * size), Math.round(y + j * size), size, size);
+  }));
+}
+
+const PINE = ['...w...', '..wgw..', '..ggg..', '.wgggw.', '.ggggg.', 'wgggggw', 'ggggggg', '...t...', '...t...'];
+function pine(x, y, s) { px(x - 14 * s, y - 36 * s, PINE, 4 * s, { g: '#2f6b3a', w: '#f4f8fb', t: '#6b4a2b' }); }
+
+function flag(x, y, color) {
+  ctx.fillStyle = '#555'; ctx.fillRect(x - 1, y - 26, 3, 40);
+  ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(x + 2, y - 26); ctx.lineTo(x + 18, y - 19); ctx.lineTo(x + 2, y - 12); ctx.fill();
+}
+
+// Seen from above, heading down the screen: helmet, jacket, and skis that turn with the steering.
+const SKIER = ['..hh..', '.hhhh.', '.ffff.', 'jjjjjj', 'ajjjja', 'ajjjja', '.pppp.', '.p..p.'];
+function skier(x, y, lean) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(-lean * 0.35);
+  ctx.fillStyle = '#c0392b'; ctx.fillRect(-11, -14, 4, 40); ctx.fillRect(7, -14, 4, 40);
+  px(-12, -18, SKIER, 4, { h: '#1d3557', f: '#f1c27d', j: '#e63946', a: '#457b9d', p: '#2b2d42' });
+  ctx.restore();
 }
 
 function roundRect(x, y, w, h, r) {
