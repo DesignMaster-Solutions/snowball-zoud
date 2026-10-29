@@ -111,11 +111,12 @@ function update(dt) {
       const before = life.savings;
       E.spend(life, o.cost, o.label, 'emergency');
       const borrowed = o.cost - Math.min(o.cost, before);
+      if (borrowed > 0) blip([196, 147], 'sawtooth', 0.3); else blip([392, 330], 'triangle');
       toast(borrowed > 0 ? `${o.label} ${money(o.cost)}: ${money(borrowed)} on the card at 24%` : `${o.label} ${money(o.cost)}: covered by savings`, borrowed > 0 ? '#ff6b6b' : '#9be7a4');
     } else if (o.kind !== 'storm' && Math.abs(o.y - by) < r && Math.abs(o.x - st.x) < o.w / 2 + r * 0.6) {
       o.hit = true;
-      if (o.kind === 'want') { const j = E.treatJoy(life.mood); E.spend(life, o.cost, o.label); toast(`${o.label} ${money(-o.cost)}  +${j} joy`, '#ffd166'); }
-      else { E.raise(life, o.amt); toast(`New skill: saving ${money(life.contribution)}/yr`, '#7cc6ff'); }
+      if (o.kind === 'want') { blip([660, 880], 'triangle'); const j = E.treatJoy(life.mood); E.spend(life, o.cost, o.label); toast(`${o.label} ${money(-o.cost)}  +${j} joy`, '#ffd166'); }
+      else { blip([523, 659, 784]); E.raise(life, o.amt); toast(`New skill: saving ${money(life.contribution)}/yr`, '#7cc6ff'); }
     }
   }
   objs = objs.filter(o => o.y > -80);
@@ -124,8 +125,8 @@ function update(dt) {
     nextYearAt += YEAR_PX;
     E.tickYear(life);
     st.stormYears++;
-    if (life.mood <= 0) { E.spend(life, 3, 'Burnout splurge', 'burnout'); toast('Burnout! You splurged $3k and it did not even help', '#ff9f43'); }
-    if (life.age >= E.END_AGE) { phase = 'end'; objs = []; }
+    if (life.mood <= 0) { blip([220, 165, 131], 'square', 0.25); E.spend(life, 3, 'Burnout splurge', 'burnout'); toast('Burnout! You splurged $3k and it did not even help', '#ff9f43'); }
+    if (life.age >= E.END_AGE) { phase = 'end'; objs = []; blip([523, 659, 784, 1047], 'sine', 0.4); if (rec) setTimeout(() => rec.state === 'recording' && rec.stop(), 7000); }
   }
   for (const t of toasts) t.t += dt;
   toasts = toasts.filter(t => t.t < 2.6);
@@ -301,12 +302,49 @@ function roundRect(x, y, w, h, r) {
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }
 
-function start() { if (phase === 'title') phase = 'play'; else if (phase === 'end') { reset(); phase = 'play'; } }
+// ---------- sound: tiny WebAudio blips, no assets; the context opens on the first tap ----------
+let ac = null, master = null;
+function blip(freqs, type = 'sine', dur = 0.18) {
+  if (!ac) return;
+  const t0 = ac.currentTime;
+  freqs.forEach((f, i) => {
+    const o = ac.createOscillator(), g = ac.createGain(), t = t0 + i * 0.07;
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.5, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(master); o.start(t); o.stop(t + dur + 0.02);
+  });
+}
+
+// ---------- ?record: canvas + sound in one webm, POSTed to /upload (the 2-minute gameplay video) ----------
+const REC = params.has('record');
+let rec = null;
+function startRecording() {
+  const dest = ac.createMediaStreamDestination();
+  master.connect(dest);
+  const stream = new MediaStream([...cv.captureStream(60).getVideoTracks(), ...dest.stream.getAudioTracks()]);
+  const chunks = [];
+  const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(t => MediaRecorder.isTypeSupported(t));
+  rec = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 12e6 });
+  rec.ondataavailable = e => chunks.push(e.data);
+  rec.onstop = () => fetch('/upload', { method: 'POST', body: new Blob(chunks, { type: 'video/webm' }) })
+    .then(r => { document.title = 'uploaded ' + r.status; });
+  rec.start(1000);
+}
+
+function unlockAudio() {
+  if (ac) return;
+  ac = new AudioContext(); master = ac.createGain(); master.gain.value = 0.25; master.connect(ac.destination);
+  if (REC) startRecording();
+}
+
+function start() {
+  if (REC && !ac) { unlockAudio(); setTimeout(() => { phase = 'play'; }, 4000); return; } // keep the title card in the video
+  unlockAudio(); if (phase === 'title') phase = 'play'; else if (phase === 'end') { reset(); phase = 'play'; } }
 cv.addEventListener('pointerdown', e => { start(); steerX = e.offsetX / scale; });
 cv.addEventListener('pointermove', e => { if (e.buttons || e.pointerType === 'touch') steerX = e.offsetX / scale; });
 addEventListener('keydown', e => { keys[e.key] = true; if (e.key === ' ' || e.key === 'Enter') start(); });
 addEventListener('keyup', e => { keys[e.key] = false; });
-if (AUTO) setTimeout(start, 1500);
+if (AUTO && !REC) setTimeout(start, 1500); // ?record waits for a tap: audio and the recorder need a user gesture
 
 let last = performance.now();
 function frame(now) {
