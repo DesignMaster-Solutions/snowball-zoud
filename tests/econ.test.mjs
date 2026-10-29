@@ -58,3 +58,46 @@ const close = (a, b, msg) => assert.ok(Math.abs(a - b) < 0.01, `${msg}: ${a} != 
 }
 
 console.log('econ ok');
+
+// Joy comes from the moment, not the price tag: a cheap treat when you are worn down beats a pricey one when you are fine.
+{
+  const a = E.newLife(); a.savings = 20; a.mood = 1; E.spend(a, 8, 'New car');
+  const b = E.newLife(); b.savings = 20; b.mood = 0.1; E.spend(b, 0.4, 'Sneakers');
+  assert.ok(b.joy > a.joy, `low-mood sneakers ${b.joy} should beat full-mood car ${a.joy}`);
+  const c = E.newLife(); c.savings = 20; c.mood = 0.1; E.spend(c, 8, 'New car');
+  assert.equal(c.joy, b.joy, 'same moment, same joy, whatever it costs');
+}
+
+// A burnout splurge costs money and brings no joy.
+{
+  const s = E.newLife(); s.savings = 5; s.mood = 0;
+  E.spend(s, 3, 'Burnout splurge', 'burnout');
+  assert.equal(s.joy, 0);
+  close(s.savings, 2, 'burnout still costs');
+  assert.ok(s.mood > 0 && s.mood < 1, 'burnout only half recovers mood');
+}
+
+// Security counts up to the retirement goal; money hoarded past it adds nothing, debt at the end costs.
+{
+  const at = (net) => { const s = E.newLife(); s.savings = Math.max(0, net); s.debt = Math.max(0, -net); return E.score(s); };
+  assert.equal(at(E.GOAL), E.SECURITY_POINTS);
+  assert.equal(at(E.GOAL * 2), E.SECURITY_POINTS, 'past the goal is unused money');
+  assert.equal(at(E.GOAL / 2), E.SECURITY_POINTS / 2);
+  assert.ok(at(-20) < 0, 'retiring in debt is negative');
+}
+
+// The balance the game is built on: a few well-timed treats + reaching the goal beats both extremes.
+{
+  const life = (treatEvery, cost) => {
+    const s = E.newLife();
+    while (s.age < E.END_AGE) {
+      if (treatEvery && s.age % treatEvery === 0) E.spend(s, cost, 'Treat');
+      E.tickYear(s);
+      if (s.mood <= 0) E.spend(s, 3, 'Burnout splurge', 'burnout');
+    }
+    return E.score(s);
+  };
+  const miser = life(0), balanced = life(5, 1), spender = life(1, 4);
+  assert.ok(balanced > miser, `balanced ${balanced} vs miser ${miser}`);
+  assert.ok(balanced > spender, `balanced ${balanced} vs spender ${spender}`);
+}

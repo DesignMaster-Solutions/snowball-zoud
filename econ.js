@@ -5,6 +5,8 @@ export const START_AGE = 22;
 export const END_AGE = 67;
 export const GROWTH = 0.06;   // long-run average yearly return of a diversified index fund, not a promise
 export const DEBT_APR = 0.24; // typical credit card APR
+export const GOAL = 300;          // $k nest egg at 67: ~$12k/yr on top of a pension at the 4% withdrawal rule
+export const SECURITY_POINTS = 400; // reaching GOAL is worth about as much joy as a life of well-timed treats
 
 export function newLife() {
   return { age: START_AGE, savings: 0, debt: 0, contribution: 3, joy: 0, interestPaid: 0, mood: 1, wants: [], log: [] };
@@ -33,9 +35,11 @@ export function spend(s, cost, label, kind = 'want') {
   s.savings -= fromSavings;
   s.debt += cost - fromSavings;
   if (kind === 'want') {
-    s.joy += cost;
+    s.joy += treatJoy(s.mood);
     s.mood = 1;
     s.wants.push({ label, cost, age: s.age });
+  } else if (kind === 'burnout') {
+    s.mood = 0.5; // a splurge you did not choose only half helps
   }
   s.log.push({ label, cost, age: s.age, kind, borrowed: cost - fromSavings });
   return s;
@@ -51,9 +55,19 @@ export function futureValue(cost, age) {
   return cost * Math.pow(1 + GROWTH, END_AGE - age);
 }
 
-// Lifetime joy = treats enjoyed along the way + what is left to live on at the end.
+// Joy depends on when you treat yourself, not on the price: treats matter most when you are worn down.
+export function treatJoy(mood) {
+  return Math.round(10 + 20 * (1 - mood));
+}
+
+// Retirement security: the nest egg counts up to GOAL; past it the money was never used, and debt at 67 costs.
+export function security(s) {
+  return Math.round(SECURITY_POINTS * Math.max(-1, Math.min(1, (s.savings - s.debt) / GOAL)));
+}
+
+// Lifetime score = joy along the way + security at the end.
 export function score(s) {
-  return Math.round(s.joy + s.savings - s.debt);
+  return Math.round(s.joy) + security(s);
 }
 
 // The receipt shown at retirement: the want that cost the most in future money.

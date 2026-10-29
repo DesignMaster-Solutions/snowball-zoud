@@ -9,15 +9,18 @@ Play: https://designmaster-solutions.github.io/snowball-zoud/ (attract mode: `?a
 Your savings are a snowball rolling down a mountain from age 22 to 67. Money left alone grows 6% a year, so the ball
 gets bigger on its own, and faster the bigger it is. That is compound growth, felt instead of explained.
 
-- **Gold treats** (a trip, a phone, a car) give joy, and each one comes out of the snowball.
+- **Gold treats** (a trip, a phone, a car) give joy, and each one comes out of the snowball. Joy depends on timing,
+  not price: a $400 treat when you are worn down beats an $8k car when you are fine.
 - **Blue skills** raise how much you save every year.
 - **Storms** (car repair, medical bill, job loss) cannot be dodged. Savings cover them; whatever savings cannot
   cover goes on a credit card at 24%, the card drags the ball (it steers slower) and your yearly saving pays the
   card first.
-- **Mood** drops every year without a treat. At zero you burn out and splurge anyway: saving everything is not the
+- **Mood** drops every year without a treat. At zero you burn out and splurge $3k anyway, with no joy: saving everything is not the
   answer either.
 
-Score = joy enjoyed along the way + what is left at 67. At retirement the game prints a receipt of your priciest treat
+Score = joy along the way + security: the nest egg counts up to a $300k goal (about $12k/yr at the 4% rule) and
+nothing past it, so hoarding scores the same as just reaching enough, and retiring in card debt scores negative.
+Measured in `tests/econ.test.mjs`: never treating 400, a treat every few years 590-740, treating every year 138. At retirement the game prints a receipt of your priciest treat
 in future money ("Beach vacation at 25: $4k then, $46k at 67; the same trip at 60: $6k").
 
 ## What players learn by playing

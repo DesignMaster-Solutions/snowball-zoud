@@ -86,7 +86,7 @@ function update(dt) {
       toast(borrowed > 0 ? `${o.label} ${money(o.cost)}: ${money(borrowed)} on the card at 24%` : `${o.label} ${money(o.cost)}: covered by savings`, borrowed > 0 ? '#ff6b6b' : '#9be7a4');
     } else if (o.kind !== 'storm' && Math.abs(o.y - BALL_Y) < r && Math.abs(o.x - st.x) < o.w / 2 + r * 0.6) {
       o.hit = true;
-      if (o.kind === 'want') { E.spend(life, o.cost, o.label); toast(`${o.label} ${money(-o.cost)}  +joy`, '#ffd166'); }
+      if (o.kind === 'want') { const j = E.treatJoy(life.mood); E.spend(life, o.cost, o.label); toast(`${o.label} ${money(-o.cost)}  +${j} joy`, '#ffd166'); }
       else { E.raise(life, o.amt); toast(`New skill: saving ${money(life.contribution)}/yr`, '#7cc6ff'); }
     }
   }
@@ -96,7 +96,7 @@ function update(dt) {
     nextYearAt += YEAR_PX;
     E.tickYear(life);
     st.stormYears++;
-    if (life.mood <= 0) { E.spend(life, 3, 'Burnout splurge'); toast('Burnout! You splurged $3k anyway', '#ff9f43'); }
+    if (life.mood <= 0) { E.spend(life, 3, 'Burnout splurge', 'burnout'); toast('Burnout! You splurged $3k and it did not even help', '#ff9f43'); }
     if (life.age >= E.END_AGE) { phase = 'end'; objs = []; }
   }
   for (const t of toasts) t.t += dt;
@@ -198,10 +198,11 @@ function titleCard() {
   panel([
     ['SNOWBALL', 54, '#fff'],
     ['Your savings roll downhill from age 22 to 67. Money left alone grows 6% a year.', 18],
-    ['Steer into gold treats to stay happy. Each one comes out of the snowball.', 18],
+    ['Steer into gold treats to stay happy. Each one comes out of the snowball,', 18],
+    ['and a treat brings more joy when your mood is low, whatever it costs.', 18],
     ['Catch blue skills to save more each year. Storms hit everyone:', 18],
     ['savings cover them, or the rest goes on a card at 24%.', 18],
-    ['Score = joy you enjoyed along the way + what is left at 67.', 18, '#ffd166'],
+    [`Score = joy along the way + reaching a ${money(E.GOAL)} nest egg at 67. Past the goal, money adds nothing.`, 17, '#ffd166'],
   ], 'Tap, click or press space to start · drag or arrows to steer');
 }
 
@@ -209,7 +210,8 @@ function endCard() {
   const p = E.priciestWant(life);
   const lines = [
     ['Retired at 67', 40, '#fff'],
-    [`Lifetime joy: ${E.score(life)}   (treats ${Math.round(life.joy)} + nest egg ${money(life.savings - life.debt)})`, 20, '#ffd166'],
+    [`Score ${E.score(life)}   (joy ${Math.round(life.joy)} + security ${E.security(life)})`, 22, '#ffd166'],
+    [`Nest egg ${money(life.savings - life.debt)} of a ${money(E.GOAL)} goal${life.savings - life.debt > E.GOAL * 1.3 ? ': you could have enjoyed more' : ''}`, 18, '#e8f4ff'],
     [`Card interest you paid: ${money(life.interestPaid)}`, 18, life.interestPaid > 0 ? '#ff6b6b' : '#9be7a4'],
   ];
   if (p) lines.push([`Your priciest treat: ${p.label} at ${p.age} cost ${money(p.cost)} then,`, 18],
