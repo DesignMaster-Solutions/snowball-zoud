@@ -101,3 +101,13 @@ console.log('econ ok');
   assert.ok(balanced > miser, `balanced ${balanced} vs miser ${miser}`);
   assert.ok(balanced > spender, `balanced ${balanced} vs spender ${spender}`);
 }
+
+// Life stages: temptations and storms change with age, and every age maps to a stage.
+{
+  assert.equal(E.stageAt(22).name, 'First job');
+  assert.equal(E.stageAt(40).name, 'Family years');
+  assert.equal(E.stageAt(66).name, 'Almost there');
+  const young = E.stageAt(22).wants.map(w => w[0]), old = E.stageAt(60).wants.map(w => w[0]);
+  assert.ok(!young.includes('Cruise') && old.includes('Cruise'), 'wants follow the age');
+  for (const s of E.STAGES) for (const [, c] of [...s.wants, ...s.storms]) assert.ok(c > 0 && c < 10, `${s.name} cost ${c}`);
+}

@@ -17,17 +17,13 @@ function fit() {
 }
 addEventListener('resize', fit); fit();
 
-const WANTS = [
-  ['Concert', 1], ['New phone', 1.2], ['Weekend trip', 2], ['Dinner out', 0.5], ['Gaming PC', 2.5],
-  ['Beach vacation', 4], ['Sneakers', 0.4], ['New car', 8], ['Wedding party', 6], ['Kitchen remodel', 5],
-];
 // The first three rows teach by doing: one of each, with a hint riding next to it.
 const INTRO = [
   { kind: 'skill', label: 'Learn a skill', amt: 0.5, hint: 'Ski through blue flags: you save more every year' },
   { kind: 'want', label: 'Concert', cost: 1, hint: 'Gold gates are treats: joy now, a smaller snowball' },
   { kind: 'storm', label: 'Car repair', cost: 2, hint: 'Savings pay for storms. What they cannot pay goes on a card at 24%' },
 ];
-const STORMS = [['Car repair', 2], ['Medical bill', 3], ['Job loss', 6], ['Roof leak', 4], ['Vet bill', 1.5]];
+const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
 let st, life, objs, dist, nextYearAt, toasts, flakes, trees, trail, phase, steerX, keys = {};
 
@@ -53,14 +49,16 @@ function spawnRow(y) {
   }
   const yearsLeft = E.END_AGE - life.age;
   if (yearsLeft > 1 && st.stormYears >= 4 && Math.random() < 0.45) {
-    const [label, cost] = STORMS[Math.floor(Math.random() * STORMS.length)];
+    const [label, cost] = pick(E.stageAt(life.age).storms);
     objs.push({ kind: 'storm', y, label, cost, hit: false });
     st.stormYears = 0;
     return;
   }
-  const [label, cost] = WANTS[Math.floor(Math.random() * WANTS.length)];
+  const [label, cost] = pick(E.stageAt(life.age).wants);
   objs.push({ kind: 'want', x: lanes[0], y, label, cost, w: 170, hit: false });
   if (Math.random() < 0.3) objs.push({ kind: 'skill', x: lanes[1], y: y + 40, label: 'Learn a skill', amt: 0.5, w: 70, hit: false });
+  // An employer match is free money: rarer than a skill, worth more, and only once you have a job that offers it.
+  else if (life.age >= 25 && !st.matched && Math.random() < 0.2) objs.push({ kind: 'skill', x: lanes[1], y: y + 40, label: 'Employer match', amt: 1.5, w: 110, hit: false });
 }
 
 // Pines line both edges of the run; they are scenery, not obstacles.
@@ -116,7 +114,11 @@ function update(dt) {
     } else if (o.kind !== 'storm' && Math.abs(o.y - by) < r && Math.abs(o.x - st.x) < o.w / 2 + r * 0.6) {
       o.hit = true;
       if (o.kind === 'want') { blip([660, 880], 'triangle'); const j = E.treatJoy(life.mood); E.spend(life, o.cost, o.label); toast(`${o.label} ${money(-o.cost)}  +${j} joy`, '#ffd166'); }
-      else { blip([523, 659, 784]); E.raise(life, o.amt); toast(`New skill: saving ${money(life.contribution)}/yr`, '#7cc6ff'); }
+      else {
+        blip([523, 659, 784]); E.raise(life, o.amt);
+        if (o.label === 'Employer match') { st.matched = true; toast(`Employer match: free money, now saving ${money(life.contribution)}/yr`, '#7cc6ff'); }
+        else toast(`New skill: saving ${money(life.contribution)}/yr`, '#7cc6ff');
+      }
     }
   }
   objs = objs.filter(o => o.y > -80);
@@ -125,6 +127,8 @@ function update(dt) {
     nextYearAt += YEAR_PX;
     E.tickYear(life);
     st.stormYears++;
+    const stage = E.stageAt(life.age);
+    if (stage.from === life.age) toast(`Age ${life.age}: ${stage.name}`, '#e0e7ff');
     if (life.mood <= 0) { blip([220, 165, 131], 'square', 0.25); E.spend(life, 3, 'Burnout splurge', 'burnout'); toast('Burnout! You splurged $3k and it did not even help', '#ff9f43'); }
     if (life.age >= E.END_AGE) { phase = 'end'; objs = []; blip([523, 659, 784, 1047], 'sine', 0.4); if (rec) setTimeout(() => rec.state === 'recording' && rec.stop(), 7000); }
   }
@@ -185,7 +189,7 @@ function draw() {
     } else if (!o.hit) {
       flag(o.x - o.w / 2, o.y, '#2d8cf0'); flag(o.x + o.w / 2, o.y, '#2d8cf0');
       ctx.fillStyle = '#05314f'; ctx.font = 'bold 13px ui-monospace, monospace'; ctx.textAlign = 'center';
-      ctx.fillText('+skill', o.x, o.y + 5);
+      ctx.fillText(o.label === 'Employer match' ? '+match' : '+skill', o.x, o.y + 5);
     }
   }
 

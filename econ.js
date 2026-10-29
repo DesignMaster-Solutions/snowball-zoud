@@ -79,3 +79,21 @@ export function priciestWant(s) {
   }
   return best;
 }
+
+// Life stages: what tempts you and what hits you changes with age ($k, same scale as everything else).
+export const STAGES = [
+  { from: 22, name: 'First job', wants: [['Concert', 1], ['New phone', 1.2], ['Gaming PC', 2.5], ['Sneakers', 0.4], ['Weekend trip', 2], ['Dinner out', 0.5]],
+    storms: [['Car repair', 2], ['Vet bill', 1.5], ['Job loss', 6]] },
+  { from: 32, name: 'Family years', wants: [['New car', 8], ['Wedding party', 6], ['Beach vacation', 4], ['Bigger TV', 1.5], ['Dinner out', 0.5]],
+    storms: [['Medical bill', 3], ['Roof leak', 4], ['Job loss', 6], ['Car repair', 2]] },
+  { from: 47, name: 'Peak earning', wants: [['Kitchen remodel', 5], ['Kids\' college trip', 3], ['Boat', 9], ['Beach vacation', 4], ['Dinner out', 0.5]],
+    storms: [['Medical bill', 3], ['Roof leak', 4], ['Parent care', 5]] },
+  { from: 58, name: 'Almost there', wants: [['Grandkids visit', 1.5], ['Cruise', 4], ['Golf clubs', 1], ['Dinner out', 0.5]],
+    storms: [['Medical bill', 3], ['Dental work', 2.5], ['Roof leak', 4]] },
+];
+
+export function stageAt(age) {
+  let st = STAGES[0];
+  for (const s of STAGES) if (age >= s.from) st = s;
+  return st;
+}
