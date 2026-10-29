@@ -4,6 +4,8 @@ A financial literacy game for [Zoud GameLab](https://itch.io/jam/zoud-gamelab) (
 
 Play: https://designmaster-solutions.github.io/snowball-zoud/ (attract mode: `?autoplay`)
 
+Gameplay video (77 s, recorded from the game with `?autoplay&record`, which waits for a tap and POSTs one webm with sound to `/upload`): https://github.com/DesignMaster-Solutions/snowball-zoud/releases/download/v0.2/snowball-gameplay.mp4
+
 For the jury: [concept doc](docs/CONCEPT.md) ([PDF](docs/CONCEPT.pdf)) · [game budget](docs/BUDGET.md) ([PDF](docs/BUDGET.pdf)) · itch page: https://designmastersolutions.itch.io/snowball
 
 ## The idea
