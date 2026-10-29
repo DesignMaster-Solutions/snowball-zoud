@@ -56,7 +56,7 @@ function sideTree(y) {
   return { x: left ? 15 + Math.random() * 70 : W - 85 + Math.random() * 70, y, s: 0.8 + Math.random() * 0.6 };
 }
 
-function toast(text, color) { toasts.push({ text, color, t: 0 }); }
+function toast(text, color) { toasts = [...toasts.slice(-1), { text, color, t: 0 }]; } // two at most, above the skier
 
 function ballR() { return 14 + Math.sqrt(Math.max(0, life.savings)) * 3.2; }
 // The skier pushes the snowball downhill, so the ball sits just below and touches things first.
@@ -160,10 +160,12 @@ function draw() {
       ctx.fillText(`STORM  ${o.label}  ${money(o.cost)}  (can't dodge this one)`, W / 2, o.y + 8);
     } else if (o.kind === 'want') {
       if (o.hit) continue;
+      const text = `${o.label} ${money(o.cost)}`;
+      ctx.font = 'bold 15px ui-monospace, monospace'; ctx.textAlign = 'center';
+      o.w = Math.max(170, ctx.measureText(text).width + 56); // the gate fits its label, and collisions use the same width
       flag(o.x - o.w / 2, o.y, '#f5b700'); flag(o.x + o.w / 2, o.y, '#f5b700');
       ctx.fillStyle = 'rgba(255,209,102,0.9)'; roundRect(o.x - o.w / 2 + 12, o.y - 14, o.w - 24, 30, 4); ctx.fill();
-      ctx.fillStyle = '#3d2c00'; ctx.font = 'bold 15px ui-monospace, monospace'; ctx.textAlign = 'center';
-      ctx.fillText(`${o.label} ${money(o.cost)}`, o.x, o.y + 6);
+      ctx.fillStyle = '#3d2c00'; ctx.fillText(text, o.x, o.y + 6);
     } else if (!o.hit) {
       flag(o.x - o.w / 2, o.y, '#2d8cf0'); flag(o.x + o.w / 2, o.y, '#2d8cf0');
       ctx.fillStyle = '#05314f'; ctx.font = 'bold 13px ui-monospace, monospace'; ctx.textAlign = 'center';
@@ -188,8 +190,8 @@ function draw() {
   ctx.textAlign = 'center';
   toasts.forEach((t, i) => {
     ctx.globalAlpha = Math.min(1, 2.6 - t.t);
-    ctx.fillStyle = 'rgba(14,26,36,0.8)'; roundRect(W / 2 - 290, H - 52 - i * 40, 580, 32, 8); ctx.fill();
-    ctx.fillStyle = t.color; ctx.font = 'bold 16px system-ui'; ctx.fillText(t.text, W / 2, H - 30 - i * 40);
+    ctx.fillStyle = 'rgba(14,26,36,0.8)'; roundRect(W / 2 - 290, 56 + i * 36, 580, 30, 8); ctx.fill();
+    ctx.fillStyle = t.color; ctx.font = 'bold 16px system-ui'; ctx.fillText(t.text, W / 2, 77 + i * 36);
     ctx.globalAlpha = 1;
   });
   if (phase === 'title') titleCard();

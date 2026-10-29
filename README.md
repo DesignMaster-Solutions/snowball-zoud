@@ -6,12 +6,12 @@ Play: https://designmaster-solutions.github.io/snowball-zoud/ (attract mode: `?a
 
 ## The idea
 
-Your savings are a snowball rolling down a mountain from age 22 to 67. Money left alone grows 6% a year, so the ball
+You ski down a mountain from age 22 to 67, seen from above, pushing your savings snowball ahead of you. Money left alone grows 6% a year, so the ball
 gets bigger on its own, and faster the bigger it is. That is compound growth, felt instead of explained.
 
-- **Gold treats** (a trip, a phone, a car) give joy, and each one comes out of the snowball. Joy depends on timing,
+- **Gold gates** are treats (a trip, a phone, a car) give joy, and each one comes out of the snowball. Joy depends on timing,
   not price: a $400 treat when you are worn down beats an $8k car when you are fine.
-- **Blue skills** raise how much you save every year.
+- **Blue flags** are skills: they raise how much you save every year.
 - **Storms** (car repair, medical bill, job loss) cannot be dodged. Savings cover them; whatever savings cannot
   cover goes on a credit card at 24%, the card drags the ball (it steers slower) and your yearly saving pays the
   card first.
