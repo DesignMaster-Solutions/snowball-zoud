@@ -40,6 +40,29 @@ in future money ("Beach vacation at 25: $4k then, $46k at 67; the same trip at 6
 `node tests/econ.test.mjs`. 6% is a long-run average for a diversified index fund, not a promise; 24% is a typical
 card APR.
 
+## Controls
+
+Tap, click or press space to start. Drag, or use the arrow keys (A/D), to steer. P or Esc pauses; on touch, the pause
+button sits in the bottom-right corner. No timer runs while paused, so the game can be read at any pace.
+
+## Accessibility and inclusion
+
+Settings live on the title card and on the pause card (tap a chip or press 1-5), are saved on the device, and can be
+linked for a class or a jury: `?a11y=large,contrast,calm,plain,mute`.
+
+- **Large text**: every label, hint, toast and card 30% bigger; boxes grow with the text.
+- **High contrast**: solid dark boxes behind every text, black outlines on the flags, a white chip behind the skill
+  labels on snow.
+- **Calm speed**: the slope runs 30% slower (the money model is per year of life, so nothing about the lesson changes).
+- **Plain words**: finance words swapped for everyday ones ("card debt" becomes "borrowed", "nest egg" becomes
+  "retirement money", "on the card at 24%" becomes "borrowed at 24% a year"); numbers and facts stay the same.
+- **Sound off**: the game never depends on audio. Every sound has a visual twin: a toast with the same fact, in a colour
+  that also carries the meaning (red for borrowing, green for covered, gold for a treat, blue for a skill).
+- Treats, skills and storms differ by shape and text, not only by colour: gold gates with a price, blue flags with
+  "+skill", a grey band with "STORM". Mood is a bar in the HUD, not just the sky getting greyer.
+- Keyboard, mouse and touch all play the whole game; the slope slows to 40% while a tutorial hint is on screen.
+- `tests/a11y.test.mjs` checks the settings (parsing, saving, the plain-words swaps): `node tests/a11y.test.mjs`.
+
 ## Built with
 
 HTML5 canvas and plain JavaScript, no engine. Code written with an AI assistant (Claude), design and testing by us.
