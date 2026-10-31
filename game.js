@@ -392,14 +392,16 @@ function unlockAudio() {
 function start() {
   if (REC && !ac) { unlockAudio(); setTimeout(() => { phase = 'play'; }, 4000); return; } // keep the title card in the video
   unlockAudio(); paused = false; if (phase === 'title') phase = 'play'; else if (phase === 'end') { reset(); phase = 'play'; } }
+// Canvas coordinates from the client ones (offsetX is wrong for untrusted events under page zoom).
+function pos(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / scale, (e.clientY - r.top) / scale]; }
 cv.addEventListener('pointerdown', e => {
-  const x = e.offsetX / scale, y = e.offsetY / scale;
+  const [x, y] = pos(e);
   if (phase === 'play' && !paused && !AUTO && inRect(x, y, PAUSE_BTN)) { paused = true; return; }
   if (phase === 'title' || paused) { const c = chipRects.find(r => inRect(x, y, r)); if (c) { setA11y(c.k); return; } }
   if (paused) { paused = false; return; }
   start(); steerX = x;
 });
-cv.addEventListener('pointermove', e => { if (!paused && (e.buttons || e.pointerType === 'touch')) steerX = e.offsetX / scale; });
+cv.addEventListener('pointermove', e => { if (!paused && (e.buttons || e.pointerType === 'touch')) steerX = pos(e)[0]; });
 addEventListener('keydown', e => {
   keys[e.key] = true;
   const n = Number(e.key);
