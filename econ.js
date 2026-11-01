@@ -9,14 +9,15 @@ export const GOAL = 300;          // $k nest egg at 67: ~$12k/yr on top of a pen
 export const SECURITY_POINTS = 400; // reaching GOAL is worth about as much joy as a life of well-timed treats
 
 export function newLife() {
-  return { age: START_AGE, savings: 0, debt: 0, contribution: 3, joy: 0, interestPaid: 0, mood: 1, wants: [], log: [] };
+  return { age: START_AGE, savings: 0, debt: 0, contribution: 3, joy: 0, interestPaid: 0, mood: 1, wants: [], log: [], given: 0, givenFV: 0 };
 }
 
 // One year passes: savings grow, debt grows, the yearly contribution pays debt first.
 export function tickYear(s) {
+  const apr = s.apr ?? DEBT_APR; // an edition can price borrowing for its own market (UAE cards: ~3% a month)
   s.savings *= 1 + GROWTH;
-  s.interestPaid += s.debt * DEBT_APR;
-  s.debt *= 1 + DEBT_APR;
+  s.interestPaid += s.debt * apr;
+  s.debt *= 1 + apr;
   let pay = s.contribution;
   if (s.debt > 0) {
     const toDebt = Math.min(pay, s.debt);
@@ -60,9 +61,26 @@ export function treatJoy(mood) {
   return Math.round(10 + 20 * (1 - mood));
 }
 
+// Zakat due this year: a share of what you own (savings minus debt) once it reaches the nisab, nothing below it.
+export function zakatDue(s, nisab, rate = 0.025) {
+  const wealth = s.savings - s.debt;
+  return wealth >= nisab ? wealth * rate : 0;
+}
+
+// Giving (zakat): leaves the snowball, but the score counts it at what it would have grown to by 67,
+// so giving never lowers the score.
+export function give(s, amount, label = 'Zakat') {
+  const paid = Math.min(amount, Math.max(0, s.savings));
+  s.savings -= paid;
+  s.given += paid;
+  s.givenFV += futureValue(paid, s.age);
+  s.log.push({ label, cost: paid, age: s.age, kind: 'give', borrowed: 0 });
+  return paid;
+}
+
 // Retirement security: the nest egg counts up to GOAL; past it the money was never used, and debt at 67 costs.
 export function security(s) {
-  return Math.round(SECURITY_POINTS * Math.max(-1, Math.min(1, (s.savings - s.debt) / GOAL)));
+  return Math.round(SECURITY_POINTS * Math.max(-1, Math.min(1, (s.savings - s.debt + (s.givenFV || 0)) / GOAL)));
 }
 
 // Lifetime score = joy along the way + security at the end.

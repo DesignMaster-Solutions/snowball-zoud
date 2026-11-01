@@ -21,6 +21,11 @@ export function speedFactor(s) { return s.calm ? 0.7 : 1; }
 // Plain words: finance words swapped for everyday ones; the numbers and the facts stay the same.
 const PLAIN = [
   ['goes on a card at 24%', 'is borrowed at 24% a year'],
+  ['goes on a card at ~3% a month', 'is borrowed at about 3% a month'],
+  ['on the card at ~3% a month', 'borrowed at about 3% a month'],
+  ['on a card at ~3% a month', 'borrowed at about 3% a month'],
+  ['Card charges you paid', 'Extra you paid for borrowing'],
+  ['your employer invests your end-of-service money', 'your employer saves for you'],
   ['on the card at 24%', 'borrowed at 24% a year'],
   ['on a card at 24%', 'borrowed at 24% a year'],
   ['Card interest you paid', 'Extra you paid for borrowing'],

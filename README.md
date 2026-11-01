@@ -45,6 +45,33 @@ card APR.
 Tap, click or press space to start. Drag, or use the arrow keys (A/D), to steer. P or Esc pauses; on touch, the pause
 button sits in the bottom-right corner. No timer runs while paused, so the game can be read at any pace.
 
+## UAE edition and Arabic (النسخة الإماراتية بالعربية)
+
+Three editions, one money model: **Global ($)**, **UAE (AED)** in English and **الإمارات (عربي)**, the UAE edition fully
+in Arabic with a right-to-left layout (HUD, cards, chips and toasts read from the right). Pick one on the title or pause
+card (tap a chip, or press L), or link it: `?edition=uae` / `?edition=uae-ar`. A device set to Arabic opens in Arabic, a
+Gulf time zone opens the UAE edition; the choice is saved on the device.
+
+What changes in the UAE editions, and why (all in `region.js`, checked by `tests/region.test.mjs`):
+
+- **Dirhams.** Every amount is shown in AED at the 3.6725 peg; the goal is AED 1.1M at 67. The model still runs in one
+  currency, so the balance and the lessons are the same in every edition.
+- **Profit, not interest.** The snowball sits in a Sharia-compliant fund and grows about 6% a year from profit. Borrowing
+  is still priced honestly: UAE cards charge about 3% a month, so a storm that savings cannot cover goes on the card at
+  36% a year (the global edition uses 24%).
+- **Zakat.** Once a year, 2.5% of what you own (savings minus debt) when it reaches the nisab, the value of 85 g of gold.
+  The game fixes the nisab at AED 35k (the real figure moves with the gold price). Zakat leaves the snowball, but the score
+  counts it at what it would have grown to by 67, so giving never lowers your score. Players it does not apply to can turn
+  the Zakat chip off (or press Z).
+- **End-of-service gratuity.** The US "employer match" becomes a gratuity savings plan: the UAE's optional scheme (2023)
+  where the employer invests your end-of-service money for you instead of paying it as a lump sum when you leave.
+- **Gulf life.** Treats and storms are priced and named for the UAE: a weekend in Oman, desert camping gear, Eid shopping and
+  Eidiya, a summer trip, a new SUV, a majlis makeover; storms such as the rent deposit and agent fee when you move, the rent
+  increase at renewal, school fees rising, a medical bill outside insurance, an AC breakdown in August, job loss.
+
+The Arabic text was drafted with an AI assistant and checked in the game on a real device; a review by a native speaker is
+in the budget (`docs/BUDGET.md`, line 4) before any release outside the jam.
+
 ## Accessibility and inclusion
 
 Settings live on the title card and on the pause card (tap a chip or press 1-5), are saved on the device, and can be

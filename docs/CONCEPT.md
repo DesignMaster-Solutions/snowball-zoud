@@ -48,10 +48,19 @@ The best play is neither hoarding nor spending: it is a plan with room for life.
 6% is a long-run average for a diversified index fund, not a promise. 24% is a typical card APR. The money model is
 one file (`econ.js`, no DOM) with tests that check it teaches true things.
 
+## UAE and Arabic edition (built during the jam)
+
+The jam build already ships a UAE edition in English and in Arabic (right-to-left), chosen on the title card or by link
+(`?edition=uae-ar`): amounts in AED at the 3.6725 peg, the snowball in a Sharia-compliant fund (profit, not interest),
+zakat at 2.5% above the nisab that never lowers the score (it counts at what it would have grown to), the UAE's
+end-of-service gratuity savings plan in place of the US employer match, UAE card costs (about 3% a month), and Gulf
+treats and storms (rent deposit and agent fee, rent increase at renewal, school fees, AC breakdown in August, Eid
+shopping and Eidiya, a weekend in Oman). Details and tests: README, `region.js`, `tests/region.test.mjs`.
+
 ## Where it goes with funding
 
-See `docs/BUDGET.md`: mobile release, Arabic and English with dirham amounts, a classroom mode with a 10-minute
-lesson plan, original art and sound, and playtests with real learners.
+See `docs/BUDGET.md`: mobile release, a native-speaker review and extension of the Arabic edition, a classroom mode with
+a 10-minute lesson plan, original art and sound, and playtests with real learners.
 
 ## Team and tools
 

@@ -1,5 +1,6 @@
 import * as E from './econ.js';
 import * as A from './a11y.js';
+import * as R from './region.js';
 
 const W = 960, H = 600, SKIER_Y = 150; // top-down: you ski down, the slope scrolls up
 const YEAR_PX = 260;          // slope distance that equals one year of life
@@ -10,7 +11,20 @@ const AUTO = params.has('autoplay');
 // Accessibility settings: saved on the device, linkable with ?a11y=large,calm; chips on the title and pause cards.
 let S = A.parseSettings(location.search, localStorage.getItem(A.STORAGE_KEY));
 function setA11y(key) { S = A.toggle(S, key); try { localStorage.setItem(A.STORAGE_KEY, A.serialize(S)); } catch { /* private mode: keep it for this run */ } }
-const F = (px, mono) => `bold ${A.fontPx(px, S)}px ${mono ? 'ui-monospace, monospace' : 'system-ui'}`;
+// Editions (global $, UAE in English, UAE in Arabic): same money model, the player's own money, words and life.
+const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } } };
+let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { /* old browser */ }
+let ED = R.edition(R.pickEdition(location.search, store.get(R.STORAGE_KEY), navigator.language, tz));
+let ZAKAT = R.zakatOn(store.get(R.ZAKAT_KEY));
+function applyLang() {
+  document.documentElement.lang = ED.lang;
+  document.title = ED.ar ? 'كرة الثلج: المال الذي تتركه ينمو' : 'Snowball: money left alone grows';
+}
+applyLang();
+function setEdition(id) { ED = R.edition(id); store.set(R.STORAGE_KEY, id); if (life) life.apr = ED.apr; applyLang(); }
+function setZakat() { ZAKAT = !ZAKAT; store.set(R.ZAKAT_KEY, ZAKAT ? 'on' : 'off'); }
+const FAMILY = 'system-ui, "Segoe UI", "Noto Sans Arabic", "Geeza Pro", sans-serif';
+const F = (px, mono) => `bold ${A.fontPx(px, S)}px ${mono ? 'ui-monospace, monospace' : FAMILY}`;
 let paused = false, chipRects = [];
 const PAUSE_BTN = { x: W - 58, y: H - 58, w: 44, h: 44 };
 const inRect = (x, y, r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
@@ -27,17 +41,17 @@ function fit() {
 addEventListener('resize', fit); fit();
 
 // The first three rows teach by doing: one of each, with a hint riding next to it.
-const INTRO = [
-  { kind: 'skill', label: 'Learn a skill', amt: 0.5, hint: 'Ski through blue flags: you save more every year' },
-  { kind: 'want', label: 'Concert', cost: 1, hint: 'Gold gates are treats: joy now, a smaller snowball' },
-  { kind: 'storm', label: 'Car repair', cost: 2, hint: 'Savings pay for storms. What they cannot pay goes on a card at 24%' },
+const intro = () => [
+  { kind: 'skill', label: ED.t('skill'), amt: 0.5, hint: ED.t('hintSkill') },
+  { kind: 'want', label: ED.t('introWant'), cost: ED.introWantCost, hint: ED.t('hintWant') },
+  { kind: 'storm', label: ED.t('introStorm'), cost: ED.introStormCost, hint: ED.t('hintStorm') },
 ];
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
 let st, life, objs, dist, nextYearAt, toasts, flakes, trees, trail, phase, steerX, keys = {};
 
 function reset() {
-  life = E.newLife(); objs = []; toasts = []; dist = 0; nextYearAt = YEAR_PX;
+  life = E.newLife(); life.apr = ED.apr; objs = []; toasts = []; dist = 0; nextYearAt = YEAR_PX;
   steerX = W / 2; phase = 'title';
   flakes = Array.from({ length: 70 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 1 + Math.random() * 2 }));
   trees = Array.from({ length: 14 }, () => sideTree(Math.random() * H));
@@ -49,8 +63,9 @@ reset();
 // Content arrives in rows. Wants and skills sit in lanes you can steer into or around; storms span the slope.
 function spawnRow(y) {
   const lanes = [W * 0.2, W * 0.5, W * 0.8].sort(() => Math.random() - 0.5);
-  if (st.intro < INTRO.length) {
-    const o = { ...INTRO[st.intro++], x: W / 2, y, w: 170, hit: false };
+  const teach = intro();
+  if (st.intro < teach.length) {
+    const o = { ...teach[st.intro++], x: W / 2, y, w: 170, hit: false };
     if (o.kind === 'skill') o.w = 90;
     if (o.kind === 'storm') st.stormYears = 0; // the taught storm counts, so a random one does not follow right behind
     objs.push(o);
@@ -58,16 +73,17 @@ function spawnRow(y) {
   }
   const yearsLeft = E.END_AGE - life.age;
   if (yearsLeft > 1 && st.stormYears >= 4 && Math.random() < 0.45) {
-    const [label, cost] = pick(E.stageAt(life.age).storms);
+    const [label, cost] = pick(ED.stageAt(life.age).storms);
     objs.push({ kind: 'storm', y, label, cost, hit: false });
     st.stormYears = 0;
     return;
   }
-  const [label, cost] = pick(E.stageAt(life.age).wants);
+  const [label, cost] = pick(ED.stageAt(life.age).wants);
   objs.push({ kind: 'want', x: lanes[0], y, label, cost, w: 170, hit: false });
-  if (Math.random() < 0.3) objs.push({ kind: 'skill', x: lanes[1], y: y + 40, label: 'Learn a skill', amt: 0.5, w: 70, hit: false });
-  // An employer match is free money: rarer than a skill, worth more, and only once you have a job that offers it.
-  else if (life.age >= 25 && !st.matched && Math.random() < 0.2) objs.push({ kind: 'skill', x: lanes[1], y: y + 40, label: 'Employer match', amt: 1.5, w: 110, hit: false });
+  if (Math.random() < 0.3) objs.push({ kind: 'skill', x: lanes[1], y: y + 40, label: ED.t('skill'), amt: 0.5, w: 70, hit: false });
+  // An employer match (UAE: an end-of-service gratuity savings plan) is free money: rarer than a skill, worth more,
+  // and only once you have a job that offers it.
+  else if (life.age >= 25 && !st.matched && Math.random() < 0.2) objs.push({ kind: 'skill', match: true, x: lanes[1], y: y + 40, label: ED.t('match'), amt: 1.5, w: 110, hit: false });
 }
 
 // Pines line both edges of the run; they are scenery, not obstacles.
@@ -82,11 +98,7 @@ function ballR() { return 14 + Math.sqrt(Math.max(0, life.savings)) * 3.2; }
 // The skier pushes the snowball downhill, so the ball sits just below and touches things first.
 function ballY() { return SKIER_Y + 30 + ballR(); }
 
-function money(k) {
-  const v = Math.abs(k);
-  const s = v >= 1000 ? (v / 1000).toFixed(2) + 'M' : v >= 10 ? v.toFixed(0) + 'k' : v.toFixed(1) + 'k';
-  return (k < 0 ? '-$' : '$') + s;
-}
+function money(k) { return ED.money(k); } // model units ($k) in the edition's currency and language
 
 function update(dt) {
   if (phase !== 'play' || paused) return;
@@ -119,14 +131,15 @@ function update(dt) {
       E.spend(life, o.cost, o.label, 'emergency');
       const borrowed = o.cost - Math.min(o.cost, before);
       if (borrowed > 0) blip([196, 147], 'sawtooth', 0.3); else blip([392, 330], 'triangle');
-      toast(borrowed > 0 ? `${o.label} ${money(o.cost)}: ${money(borrowed)} on the card at 24%` : `${o.label} ${money(o.cost)}: covered by savings`, borrowed > 0 ? '#ff6b6b' : '#9be7a4');
+      toast(borrowed > 0 ? ED.t('stormBorrowed', { label: o.label, cost: money(o.cost), borrowed: money(borrowed) })
+        : ED.t('stormCovered', { label: o.label, cost: money(o.cost) }), borrowed > 0 ? '#ff6b6b' : '#9be7a4');
     } else if (o.kind !== 'storm' && Math.abs(o.y - by) < r && Math.abs(o.x - st.x) < o.w / 2 + r * 0.6) {
       o.hit = true;
-      if (o.kind === 'want') { blip([660, 880], 'triangle'); const j = E.treatJoy(life.mood); E.spend(life, o.cost, o.label); toast(`${o.label} ${money(-o.cost)}  +${j} joy`, '#ffd166'); }
+      if (o.kind === 'want') { blip([660, 880], 'triangle'); const j = E.treatJoy(life.mood); E.spend(life, o.cost, o.label); toast(ED.t('want', { label: o.label, cost: money(-o.cost), joy: j }), '#ffd166'); }
       else {
         blip([523, 659, 784]); E.raise(life, o.amt);
-        if (o.label === 'Employer match') { st.matched = true; toast(`Employer match: free money, now saving ${money(life.contribution)}/yr`, '#7cc6ff'); }
-        else toast(`New skill: saving ${money(life.contribution)}/yr`, '#7cc6ff');
+        if (o.match) { st.matched = true; toast(ED.t('matchToast', { c: money(life.contribution) }), '#7cc6ff'); }
+        else toast(ED.t('skillToast', { c: money(life.contribution) }), '#7cc6ff');
       }
     }
   }
@@ -136,9 +149,14 @@ function update(dt) {
     nextYearAt += YEAR_PX;
     E.tickYear(life);
     st.stormYears++;
-    const stage = E.stageAt(life.age);
-    if (stage.from === life.age) toast(`Age ${life.age}: ${stage.name}`, '#e0e7ff');
-    if (life.mood <= 0) { blip([220, 165, 131], 'square', 0.25); E.spend(life, 3, 'Burnout splurge', 'burnout'); toast('Burnout! You splurged $3k and it did not even help', '#ff9f43'); }
+    // Zakat (UAE editions, unless the player turned it off): 2.5% of what you own once it reaches the nisab.
+    if (ED.hasZakat && ZAKAT) {
+      const paid = E.give(life, E.zakatDue(life, R.NISAB, R.ZAKAT_RATE));
+      if (paid > 0 && !st.zakatShown) { st.zakatShown = true; toast(ED.t('zakatToast', { x: money(paid) }), '#9be7a4'); }
+    }
+    const stage = ED.stageAt(life.age);
+    if (stage.from === life.age) toast(ED.t('stageToast', { age: life.age, stage: stage.name }), '#e0e7ff');
+    if (life.mood <= 0) { blip([220, 165, 131], 'square', 0.25); E.spend(life, 3, 'Burnout splurge', 'burnout'); toast(ED.t('burnout', { x: money(3) }), '#ff9f43'); }
     if (life.age >= E.END_AGE) { phase = 'end'; objs = []; blip([523, 659, 784, 1047], 'sine', 0.4); if (rec) setTimeout(() => rec.state === 'recording' && rec.stop(), 7000); }
   }
   for (const t of toasts) t.t += dt;
@@ -159,6 +177,7 @@ function pilot() {
 }
 
 function draw() {
+  ctx.direction = ED.rtl ? 'rtl' : 'ltr';
   const g = ctx.createLinearGradient(0, 0, 0, H);
   const gray = 1 - life.mood;
   g.addColorStop(0, `hsl(205,${45 - gray * 30}%,${88 - gray * 10}%)`);
@@ -186,21 +205,23 @@ function draw() {
       ctx.fillRect(0, o.y - 28, W, 56);
       if (o.hit) continue; // the toast already told the story; the label would scroll under the HUD
       ctx.fillStyle = '#fff'; ctx.font = F(22); ctx.textAlign = 'center';
-      ctx.fillText(`STORM  ${o.label}  ${money(o.cost)}  (can't dodge this one)`, W / 2, o.y + 8);
+      ctx.fillText(ED.t('storm', { label: o.label, cost: money(o.cost) }), W / 2, o.y + 8);
     } else if (o.kind === 'want') {
       if (o.hit) continue;
       const text = `${o.label} ${money(o.cost)}`;
-      ctx.font = F(15, true); ctx.textAlign = 'center';
+      ctx.font = ED.ar ? F(15) : F(15, true); ctx.textAlign = 'center';
       o.w = Math.max(170, ctx.measureText(text).width + 56); // the gate fits its label, and collisions use the same width
       flag(o.x - o.w / 2, o.y, '#f5b700'); flag(o.x + o.w / 2, o.y, '#f5b700');
       ctx.fillStyle = S.contrast ? '#ffd166' : 'rgba(255,209,102,0.9)'; roundRect(o.x - o.w / 2 + 12, o.y - 14, o.w - 24, 30, 4); ctx.fill();
       ctx.fillStyle = S.contrast ? '#000' : '#3d2c00'; ctx.fillText(text, o.x, o.y + 6);
     } else if (!o.hit) {
       flag(o.x - o.w / 2, o.y, '#2d8cf0'); flag(o.x + o.w / 2, o.y, '#2d8cf0');
-      ctx.font = F(13, true); ctx.textAlign = 'center';
-      if (S.contrast) { ctx.fillStyle = '#fff'; roundRect(o.x - 36, o.y - 8, 72, 22, 6); ctx.fill(); } // a chip behind the label, so it reads on snow
+      const tag = ED.t(o.match ? 'flagMatch' : 'flagSkill');
+      ctx.font = ED.ar ? F(14) : F(13, true); ctx.textAlign = 'center';
+      const tw = Math.max(72, ctx.measureText(tag).width + 16);
+      if (S.contrast) { ctx.fillStyle = '#fff'; roundRect(o.x - tw / 2, o.y - 8, tw, 22, 6); ctx.fill(); } // a chip behind the label, so it reads on snow
       ctx.fillStyle = S.contrast ? '#000' : '#05314f';
-      ctx.fillText(o.label === 'Employer match' ? '+match' : '+skill', o.x, o.y + 5);
+      ctx.fillText(tag, o.x, o.y + 5);
     }
   }
 
@@ -245,44 +266,80 @@ function hint(o) {
 
 function hud() {
   ctx.fillStyle = S.contrast ? 'rgba(0,0,0,0.94)' : 'rgba(14,26,36,0.82)'; ctx.fillRect(0, 0, W, 50);
-  ctx.font = F(17); ctx.textAlign = 'left';
   const items = [
-    [`Age ${life.age}`, '#fff'], [`Savings ${money(life.savings)}`, '#e8f4ff'],
-    [`Saving ${money(life.contribution)}/yr`, '#7cc6ff'], [A.plain(`Card debt ${money(life.debt)}`, S), life.debt > 0 ? '#ff6b6b' : '#8aa'],
-    [`Joy ${Math.round(life.joy)}`, '#ffd166'],
+    [ED.t('hudAge', { n: life.age }), '#fff'], [ED.t('hudSavings', { x: money(life.savings) }), '#e8f4ff'],
+    [ED.t('hudSaving', { x: money(life.contribution) }), '#7cc6ff'], [A.plain(ED.t('hudDebt', { x: money(life.debt) }), S), life.debt > 0 ? '#ff6b6b' : '#8aa'],
+    [ED.t('hudJoy', { n: Math.round(life.joy) }), '#ffd166'],
   ];
-  let x = 18;
-  for (const [t, c] of items) { ctx.fillStyle = c; ctx.fillText(t, x, 32); x += ctx.measureText(t).width + 30; }
-  ctx.fillStyle = '#334'; ctx.fillRect(W - 150, 18, 130, 14);
-  ctx.fillStyle = life.mood > 0.35 ? '#ffd166' : '#ff9f43'; ctx.fillRect(W - 150, 18, 130 * life.mood, 14);
-  ctx.fillStyle = '#ccd'; ctx.font = '12px system-ui'; ctx.fillText('mood', W - 192, 30);
+  // Dirhams and Arabic run longer than dollars: shrink the row until it clears the mood bar.
+  let size = 17, gap = 30;
+  for (;;) {
+    ctx.font = F(size);
+    const total = items.reduce((a, [t]) => a + ctx.measureText(t).width, 0) + gap * (items.length - 1);
+    if (total <= W - 230 || size <= 11) break;
+    size--; gap = Math.max(16, gap - 2);
+  }
+  ctx.textAlign = ED.rtl ? 'right' : 'left';
+  let x = ED.rtl ? W - 18 : 18;
+  for (const [t, c] of items) { ctx.fillStyle = c; ctx.fillText(t, x, 32); const w = ctx.measureText(t).width + gap; x += ED.rtl ? -w : w; }
+  const bx = ED.rtl ? 20 : W - 150; // the mood bar sits at the far end of the reading direction
+  ctx.fillStyle = '#334'; ctx.fillRect(bx, 18, 130, 14);
+  ctx.fillStyle = life.mood > 0.35 ? '#ffd166' : '#ff9f43'; ctx.fillRect(ED.rtl ? bx + 130 * (1 - life.mood) : bx, 18, 130 * life.mood, 14);
+  ctx.fillStyle = '#ccd'; ctx.font = `12px ${FAMILY}`; ctx.textAlign = ED.rtl ? 'left' : 'right';
+  ctx.fillText(ED.t('mood'), ED.rtl ? bx + 138 : bx - 8, 30);
 }
 
-function panel(lines, foot) {
+function panel(lines, foot, top = 130, gap = S.large ? 11 : 16, box = null) {
   ctx.fillStyle = S.contrast ? 'rgba(0,0,0,0.96)' : 'rgba(14,26,36,0.9)'; roundRect(130, 70, W - 260, H - 120, 18); ctx.fill();
   ctx.textAlign = 'center';
-  let y = 130;
-  for (const [t, size, c] of lines) { ctx.fillStyle = c || '#e8f4ff'; ctx.font = `${size >= 30 ? 'bold ' : ''}${A.fontPx(size, S)}px system-ui`; ctx.fillText(A.plain(t, S), W / 2, y); y += A.fontPx(size, S) + (S.large ? 11 : 16); }
-  ctx.fillStyle = '#ffd166'; ctx.font = F(20); ctx.fillText(foot, W / 2, H - 90);
+  let y = top;
+  const fitFont = (text, px, bold) => { // a line never spills out of the card, whatever the language
+    let p = px;
+    do { ctx.font = `${bold ? 'bold ' : ''}${p}px ${FAMILY}`; } while (ctx.measureText(text).width > W - 300 && --p > 11);
+  };
+  let sizes = lines.map(([, size]) => A.fontPx(size, S));
+  if (box) { // chips above and below (title card): shrink all lines together until they fit between the rows
+    for (let f = 1; ; f -= 0.03) {
+      const sz = sizes.map(v => Math.round(v * f)), first = box.top + Math.round(sz[0] * 0.95);
+      if (first + sz.slice(0, -1).reduce((a, v) => a + v + gap, 0) <= box.bottom || f < 0.65) { sizes = sz; y = first; break; }
+    }
+  }
+  lines.forEach(([t, size, c], i) => { const text = A.plain(t, S); ctx.fillStyle = c || '#e8f4ff'; fitFont(text, sizes[i], size >= 30); ctx.fillText(text, W / 2, y); y += sizes[i] + gap; });
+  ctx.fillStyle = '#ffd166'; fitFont(foot, A.fontPx(20, S), true); ctx.fillText(foot, W / 2, H - 90);
 }
 
 // Accessibility toggles as a row of chips (box + label); the rects stay for taps, keys 1-5 do the same.
 function chips(y) {
-  ctx.font = '13px system-ui'; ctx.fillStyle = '#bcd'; ctx.fillText('Settings (tap a chip or press 1-5), saved on this device', W / 2, y - 26);
-  ctx.font = 'bold 14px system-ui'; ctx.textAlign = 'left';
-  const items = A.KEYS.map(k => ({ k, t: A.LABELS[k], w: ctx.measureText(A.LABELS[k]).width + 42 }));
+  ctx.textAlign = 'center'; ctx.font = `13px ${FAMILY}`; ctx.fillStyle = '#bcd'; ctx.fillText(ED.t('settings'), W / 2, y - 26);
+  chipRow(y, A.KEYS.map(k => ({ k, t: ED.t('a11y_' + k), on: S[k] })));
+}
+
+// One row of checkbox chips, centred; in Arabic the box sits on the right and the label reads leftward.
+function chipRow(y, items) {
+  ctx.font = `bold 14px ${FAMILY}`;
+  for (const it of items) it.w = ctx.measureText(it.t).width + 42;
   let x = W / 2 - (items.reduce((a, b) => a + b.w, 0) + (items.length - 1) * 8) / 2;
-  chipRects = [];
-  for (const it of items) {
-    const on = S[it.k];
+  for (const it of ED.rtl ? [...items].reverse() : items) { // Arabic reads from the right: the first chip sits rightmost
+    const on = it.on, bx = ED.rtl ? x + it.w - 26 : x + 12;
     ctx.fillStyle = on ? '#ffd166' : 'rgba(255,255,255,0.14)'; roundRect(x, y - 15, it.w, 30, 15); ctx.fill();
-    ctx.strokeStyle = on ? '#1b1b1b' : '#e8f4ff'; ctx.lineWidth = 2; ctx.strokeRect(x + 12, y - 7, 14, 14);
-    if (on) { ctx.fillStyle = '#1b1b1b'; ctx.fillRect(x + 15, y - 4, 8, 8); }
-    ctx.fillStyle = on ? '#1b1b1b' : '#e8f4ff'; ctx.fillText(it.t, x + 32, y + 5);
+    ctx.strokeStyle = on ? '#1b1b1b' : '#e8f4ff'; ctx.lineWidth = 2; ctx.strokeRect(bx, y - 7, 14, 14);
+    if (on) { ctx.fillStyle = '#1b1b1b'; ctx.fillRect(bx + 3, y - 4, 8, 8); }
+    ctx.fillStyle = on ? '#1b1b1b' : '#e8f4ff'; ctx.textAlign = ED.rtl ? 'right' : 'left';
+    ctx.direction = /[\u0600-\u06FF]/.test(it.t) ? 'rtl' : 'ltr'; // "Global ($)" must not flip in the Arabic edition
+    ctx.fillText(it.t, ED.rtl ? x + it.w - 32 : x + 32, y + 5);
+    ctx.direction = ED.rtl ? 'rtl' : 'ltr';
     chipRects.push({ k: it.k, x, y: y - 15, w: it.w, h: 30 });
     x += it.w + 8;
   }
   ctx.textAlign = 'center';
+}
+
+// Edition chips (and Zakat, in the UAE editions): tap one, or L cycles editions and Z toggles zakat.
+function editionChips(y) {
+  const items = [{ k: 'ed:global', t: ED.t('edGlobal'), on: ED.id === 'global' }, { k: 'ed:uae', t: ED.t('edUae'), on: ED.id === 'uae' },
+    { k: 'ed:uae-ar', t: ED.t('edUaeAr'), on: ED.id === 'uae-ar' }];
+  if (ED.hasZakat) items.push({ k: 'zakat', t: ED.t('zakatChip'), on: ZAKAT });
+  chipRow(y, items);
 }
 
 function pauseBtn() {
@@ -291,36 +348,42 @@ function pauseBtn() {
 }
 
 function pauseCard() {
-  panel([['Paused', 40, '#fff'], ['Settings also work here. P or Esc resumes.', 18, '#bcd']], 'Tap anywhere else to continue');
-  chips(300);
+  chipRects = [];
+  panel([[ED.t('paused'), 40, '#fff'], [ED.t('pausedSub'), 18, '#bcd']], ED.t('pausedFoot'));
+  editionChips(250);
+  chips(340);
 }
 
 function titleCard() {
-  panel([
-    ['SNOWBALL', 54, '#fff'],
-    ['Ski from 22 down to 67, pushing your savings snowball. It grows 6% a year.', 18],
-    ['Gold gates are treats: they keep you happy and come out of the snowball.', 18],
-    ['A treat brings more joy when your mood is low, whatever it costs.', 18],
-    ['Blue flags are skills: they raise what you save each year.', 18],
-    ['Storms hit everyone: savings cover them, or the rest goes on a card at 24%.', 18],
-    [`Score = joy along the way + reaching a ${money(E.GOAL)} nest egg at 67.`, 18, '#ffd166'],
-    ['Past the goal, money adds nothing.', 18, '#ffd166'],
-  ], 'Tap, click or space to start · drag or arrows to steer · P pauses');
-  chips(462);
+  chipRects = [];
+  const goal = money(E.GOAL);
+  const lines = ED.uae ? [
+    [ED.t('title'), 46, '#fff'], [ED.t('t1'), 18], [ED.t('t1b'), 18], [ED.t('t23'), 18], [ED.t('t4'), 18], [ED.t('t5'), 18],
+    [ED.t('tZakat'), 18, '#9be7a4'], [ED.t('t67', { goal }), 18, '#ffd166'],
+  ] : [
+    [ED.t('title'), 46, '#fff'], [ED.t('t1'), 18], [ED.t('t2'), 18], [ED.t('t3'), 18], [ED.t('t4'), 18], [ED.t('t5'), 18],
+    [ED.t('t6', { goal }), 18, '#ffd166'], [ED.t('t7'), 18, '#ffd166'],
+  ];
+  panel(lines, ED.t('titleFoot'), 160, S.large ? 10 : 14, { top: 116, bottom: 424 });
+  editionChips(96);
+  chips(470);
 }
 
 function endCard() {
+  chipRects = [];
   const p = E.priciestWant(life);
+  const nest = life.savings - life.debt;
   const lines = [
-    ['Retired at 67', 40, '#fff'],
-    [`Score ${E.score(life)}   (joy ${Math.round(life.joy)} + security ${E.security(life)})`, 22, '#ffd166'],
-    [`Nest egg ${money(life.savings - life.debt)} of a ${money(E.GOAL)} goal${life.savings - life.debt > E.GOAL * 1.3 ? ': you could have enjoyed more' : ''}`, 18, '#e8f4ff'],
-    [`Card interest you paid: ${money(life.interestPaid)}`, 18, life.interestPaid > 0 ? '#ff6b6b' : '#9be7a4'],
+    [ED.t('endTitle'), 40, '#fff'],
+    [ED.t('endScore', { s: E.score(life), j: Math.round(life.joy), sec: E.security(life) }), 22, '#ffd166'],
+    [ED.t('endNest', { x: money(nest), goal: money(E.GOAL), more: nest + life.givenFV > E.GOAL * 1.3 ? ED.t('endMore') : '' }), 18, '#e8f4ff'],
+    [ED.t('endCard', { x: money(life.interestPaid) }), 18, life.interestPaid > 0 ? '#ff6b6b' : '#9be7a4'],
   ];
-  if (p) lines.push([`Your priciest treat: ${p.label} at ${p.age} cost ${money(p.cost)} then,`, 18],
-    [`${money(p.fv)} of money at 67. Same treat at 60: ${money(E.futureValue(p.cost, 60))}.`, 18, '#7cc6ff']);
-  lines.push(['Early money has the most years to grow. Late treats are cheap, early debt is expensive.', 16, '#bcd']);
-  panel(lines, 'Tap to live it again');
+  if (ED.hasZakat && life.given > 0) lines.push([ED.t('endZakat', { x: money(life.given) }), 18, '#9be7a4']);
+  if (p) lines.push([ED.t('endPricey', { label: p.label, age: p.age, cost: money(p.cost) }), 18],
+    [ED.t('endPricey2', { fv: money(p.fv), fv60: money(E.futureValue(p.cost, 60)) }), 18, '#7cc6ff']);
+  lines.push([ED.t('endLesson'), 16, '#bcd']);
+  panel(lines, ED.t('endFoot'));
 }
 
 // Pixel sprites, drawn from rects on a 4 px grid so they stay crisp at any scale.
@@ -397,7 +460,10 @@ function pos(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.l
 cv.addEventListener('pointerdown', e => {
   const [x, y] = pos(e);
   if (phase === 'play' && !paused && !AUTO && inRect(x, y, PAUSE_BTN)) { paused = true; return; }
-  if (phase === 'title' || paused) { const c = chipRects.find(r => inRect(x, y, r)); if (c) { setA11y(c.k); return; } }
+  if (phase === 'title' || paused) {
+    const c = chipRects.find(r => inRect(x, y, r));
+    if (c) { if (c.k.startsWith('ed:')) setEdition(c.k.slice(3)); else if (c.k === 'zakat') setZakat(); else setA11y(c.k); return; }
+  }
   if (paused) { paused = false; return; }
   start(); steerX = x;
 });
@@ -406,6 +472,8 @@ addEventListener('keydown', e => {
   keys[e.key] = true;
   const n = Number(e.key);
   if (n >= 1 && n <= A.KEYS.length && (phase === 'title' || paused)) { setA11y(A.KEYS[n - 1]); return; }
+  if ((e.key === 'l' || e.key === 'L') && (phase === 'title' || paused)) { setEdition(R.EDITIONS[(R.EDITIONS.indexOf(ED.id) + 1) % R.EDITIONS.length]); return; }
+  if ((e.key === 'z' || e.key === 'Z') && ED.hasZakat && (phase === 'title' || paused)) { setZakat(); return; }
   if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape') && phase === 'play' && !AUTO) { paused = !paused; return; }
   if (e.key === ' ' || e.key === 'Enter') { if (paused) paused = false; else start(); }
 });
