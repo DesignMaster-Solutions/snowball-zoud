@@ -9,10 +9,10 @@ const params = new URLSearchParams(location.search);
 const AUTO = params.has('autoplay');
 
 // Accessibility settings: saved on the device, linkable with ?a11y=large,calm; chips on the title and pause cards.
-let S = A.parseSettings(location.search, localStorage.getItem(A.STORAGE_KEY));
+const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } } };
+let S = A.parseSettings(location.search, store.get(A.STORAGE_KEY));
 function setA11y(key) { S = A.toggle(S, key); try { localStorage.setItem(A.STORAGE_KEY, A.serialize(S)); } catch { /* private mode: keep it for this run */ } }
 // Editions (global $, UAE in English, UAE in Arabic): same money model, the player's own money, words and life.
-const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } } };
 let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { /* old browser */ }
 let ED = R.edition(R.pickEdition(location.search, store.get(R.STORAGE_KEY), navigator.language, tz));
 let ZAKAT = R.zakatOn(store.get(R.ZAKAT_KEY));

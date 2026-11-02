@@ -61,7 +61,7 @@ What changes in the UAE editions, and why (all in `region.js`, checked by `tests
   36% a year (the global edition uses 24%).
 - **Zakat.** Once a year, 2.5% of what you own (savings minus debt) when it reaches the nisab, the value of 85 g of gold.
   The game fixes the nisab at AED 35k (the real figure moves with the gold price). Zakat leaves the snowball, but the score
-  counts it at what it would have grown to by 67, so giving never lowers your score. Players it does not apply to can turn
+  counts it at what it would have grown to by 67, so the money given still counts in your score. Players it does not apply to can turn
   the Zakat chip off (or press Z).
 - **End-of-service gratuity.** The US "employer match" becomes a gratuity savings plan: the UAE's optional scheme (2023)
   where the employer invests your end-of-service money for you instead of paying it as a lump sum when you leave.
@@ -92,4 +92,4 @@ linked for a class or a jury: `?a11y=large,contrast,calm,plain,mute`.
 
 ## Built with
 
-HTML5 canvas and plain JavaScript, no engine. Code written with an AI assistant (Claude), design and testing by us.
+HTML5 canvas and plain JavaScript, no engine. Built with an AI coding agent (Claude) under the author's direction: the code, the Arabic text, and drafts of the design and documents. No AI images, music or voice.

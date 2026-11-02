@@ -1,5 +1,6 @@
 // node tests/a11y.test.mjs — the accessibility settings are pure and shared with the game.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import * as A from '../a11y.js';
 
 // Defaults: everything off.
@@ -48,3 +49,8 @@ import * as A from '../a11y.js';
 }
 
 console.log('a11y ok');
+
+// Storage can be blocked (an itch iframe with third-party cookies off): a bare read kills the module on load, so the game never starts.
+for (const line of readFileSync(new URL('../game.js', import.meta.url), 'utf8').split('\n')) {
+  if (line.includes('localStorage')) assert.ok(line.includes('try'), `unguarded storage: ${line.trim()}`);
+}

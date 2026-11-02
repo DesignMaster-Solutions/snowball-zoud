@@ -10,12 +10,18 @@ Blended studio rate: US$ 45/hour. All amounts in US dollars.
 | 3 | Original music and sound effects, mixed for phones | 80 | 3,600 |
 | 4 | Arabic and English: review of the jam's Arabic edition by a native speaker and an Islamic-finance adviser, the new content in both languages, right-to-left UI for it | 90 | 4,050 |
 | 5 | Mobile release: iOS and Android builds, store listings, accessibility (color-blind safe, one-hand play) | 160 | 7,200 |
-| 6 | Classroom mode: teacher dashboard with no personal data, 10-minute lesson plan, printable debrief | 140 | 6,300 |
+| 6 | Classroom mode, shaped with teachers: teacher dashboard with no personal data, 10-minute lesson plan, printable debrief | 140 | 6,300 |
 | 7 | Playtests: 3 rounds with learners 16-30, before/after questions on the 4 lessons, fixes | 100 | 4,500 |
-| 8 | QA, performance on low-end phones, launch and 3 months of support | 110 | 4,950 |
+| 8 | QA, performance on low-end phones, launch, and 3 months of support after release (months 7 to 9) | 110 | 4,950 |
 |   | **Subtotal** | **1,000** | **45,000** |
 |   | Contingency (10%) | | 4,500 |
 |   | **Total** | | **49,500** |
+
+## Assumptions
+
+The AI agent speeds up the code, so most funded hours go to what it cannot do alone: art, music, expert review, playtests
+with people, classroom work with teachers and store releases. There are no other cost lines because our store accounts
+already exist and the web build stays on free hosting.
 
 ## Milestones
 
