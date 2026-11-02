@@ -1,68 +1,133 @@
-# Snowball: concept doc / initial game design document
+# Snowball
 
-Zoud GameLab entry by Design Master Solutions LLC. Theme: Make FinLit Fun.
-Play: https://designmaster-solutions.github.io/snowball-zoud/
+**Game Concept Document** for Zoud GameLab 2026, theme: Make FinLit Fun. Describes build 0.5, the one submitted.
 
-## One line
+[Play in the browser](https://designmaster-solutions.github.io/snowball-zoud/) · [Arabic edition](https://designmaster-solutions.github.io/snowball-zoud/?edition=uae-ar) · [2-minute gameplay video](https://youtu.be/s3qtXGRBc7I) · [Game budget (separate document)](https://designmaster-solutions.github.io/snowball-zoud/docs/BUDGET.pdf) · [Source code](https://github.com/DesignMaster-Solutions/snowball-zoud)
 
-Ski a whole working life, 22 to 67, pushing your savings snowball downhill: it grows on its own, treats take a bite,
-storms you cannot dodge show why an emergency fund matters.
+![Age 62: the savings snowball has grown to $685k and passes a gold gate, a treat that would come out of it](shots/hero.jpg)
 
-## Who it is for
+## 1. Game Overview
 
-Young adults (16-30) getting their first salary, and the teachers and programs that want to talk money with them
-without a lecture. One run takes about 3 minutes, so it fits a class, a commute or a waiting room.
+Snowball is a skiing game about a whole working life. You ski from age 22 to 67 pushing your savings ahead of you as a snowball. Left alone it grows on its own, treats take a bite out of it, and storms you cannot dodge show why an emergency fund matters.
 
-## The learning goal, as mechanics
+| | |
+|-----------------|-----------------------------------------------------------------|
+| **Title and genre** | Snowball (كرة الثلج). Arcade skiing with light money management |
+| **Platform** | Any browser today, on phone, tablet or computer, by touch, mouse or keyboard. iOS and Android are the next step with funding |
+| **Audience** | Young adults aged 16 to 30 getting their first salary, and the teachers and programs that want to talk about money with them without a lecture |
+| **Length** | One life takes about 80 seconds (under 2 minutes at Calm speed), so it fits a class, a commute or a waiting room |
+| **Editions** | Global ($), UAE (AED) in English, and UAE in Arabic, right to left |
 
-| Idea | How the player feels it (no text, no quiz) |
-|---|---|
-| Compound growth | The ball grows 6% a year by itself and gets bigger faster the bigger it is |
-| Start early | The same saving habit started later ends with a visibly smaller ball |
-| Emergency fund | Storms (car repair, medical bill, job loss, roof leak, vet bill) cannot be dodged; savings absorb them |
-| High-interest debt | What savings cannot cover goes on a card at 24%; the card drags the ball (slower steering) and eats the yearly saving first |
-| Balance | Mood falls every year without a treat; at zero you burn out and splurge $3k with no joy |
-| Timing of spending | Joy from a treat depends on how worn down you are, not on its price |
-| Enough is a goal | Security counts up to a $300k nest egg (about $12k/yr at the 4% rule) and nothing past it |
+**What makes it different.** The money is a physical thing. The ball is your balance: you watch it grow slowly at 22 and quickly at 60, and you steer it yourself. Because the ball is what touches things, the richer you get, the harder it is to ski around a gold gate. There is no quiz, no menu of choices and no game over. Everyone reaches 67, and then the game prices what your choices cost.
 
-The first three rows of the slope are a tutorial played, not read: a blue flag (skills raise your yearly saving),
-a gold gate (a $1k concert: joy now, a smaller snowball) and a storm (a $2k car repair the savings pay for).
+## 2. Core Gameplay
 
-## Core loop
+**Objective.** Reach 67 with the best life score: joy along the way plus security at the end.
 
-1. Steer left and right (arrows, A/D or touch).
-2. Gold gates = treats from a pool of everyday wants (concert, phone, trip, car, wedding party, remodel).
-3. Blue flags = skills that raise the yearly contribution.
-4. Storms arrive at random and hit everyone.
-5. Every row is one year: savings grow, debt grows, the contribution pays debt first, mood drops.
-6. At 67: score = joy + security, and a receipt of your priciest treat in future money
-   ("Beach vacation at 25: $4k then, $46k at 67; the same trip at 60: $6k").
+**Actions.** Steer left and right, by dragging or with the arrow keys. That is the only input, so anyone can play from the first second.
 
-## Why this score
+**The loop.** Every row of the slope is a small decision, and about every 1.5 seconds a year of life goes by.
 
-Measured in `tests/econ.test.mjs`: never treating scores 400, a treat every few years 590-740, treating every year 138.
-The best play is neither hoarding nor spending: it is a plan with room for life. That is the lesson.
+1. **Gold gates are treats.** Ski through for joy, and the price comes out of the ball. Ski around and you keep the money, but your mood keeps falling.
+2. **Blue flags are skills.** Each one raises what you save every year. From age 25 a rarer flag offers an employer match, which is worth three skills.
+3. **Storms cross the whole slope** and cannot be dodged. Savings pay for them. What savings cannot cover goes on a credit card.
+4. **Every year** savings grow, debt grows, your yearly saving pays the card first, and mood falls.
+5. **At 67** you get a score and a receipt: "Your priciest treat: Beach vacation at 37 cost $4.0k then, $23k of money at 67. Same treat at 60: $6.0k."
 
-## Honesty of the numbers
+**Decisions and progress.** Which treat, and when? Is that flag worth steering past that gate? Four life stages change what tempts you and what hits you: First job (22), Family years (32), Peak earning (47) and Almost there (58). A concert becomes a new car, then a kitchen remodel, then a visit to the grandkids.
 
-6% is a long-run average for a diversified index fund, not a promise. 24% is a typical card APR. The money model is
-one file (`econ.js`, no DOM) with tests that check it teaches true things.
+**Why it is fun to repeat.** It is a downhill run with a ball that visibly swells. A life is short, the receipt names something you chose, and "Tap to live it again" is one touch away.
 
-## UAE and Arabic edition (built during the jam)
+| | |
+|-------------------------------------|-----------------------|
+| ![The tutorial row with a treat and a storm, each with one line of text](shots/tutorial.jpg) | **The tutorial is played, not read.** The first three rows are one skill, one treat and one storm, each with one line of text, while the slope slows to 40%. |
 
-The jam build already ships a UAE edition in English and in Arabic (right-to-left), chosen on the title card or by link
-(`?edition=uae-ar`): amounts in AED at the 3.6725 peg, the snowball in a Sharia-compliant fund (profit, not interest),
-zakat at 2.5% above the nisab that never lowers the score (it counts at what it would have grown to), the UAE's
-end-of-service gratuity savings plan in place of the US employer match, UAE card costs (about 3% a month), and Gulf
-treats and storms (rent deposit and agent fee, rent increase at renewal, school fees, AC breakdown in August, Eid
-shopping and Eidiya, a weekend in Oman). Details and tests: README, `region.js`, `tests/region.test.mjs`.
+## 3. Financial Literacy Integration
 
-## Where it goes with funding
+The game has no lesson screen. Each idea is a rule of the slope, so the player meets it by playing.
 
-See `docs/BUDGET.md`: mobile release, a native-speaker review and extension of the Arabic edition, a classroom mode with
-a 10-minute lesson plan, original art and sound, and playtests with real learners.
+| **Concept** | **The mechanic** | **What the player lives through** |
+|---------------|-----------------------------|------------------------------------|
+| Compound growth | The ball grows 6% a year by itself | Slow at first, then it swells: $47k at 33 and $685k at 62 in the run in our video |
+| Opportunity cost | A treat leaves the ball, and the receipt prices it in money at 67 | A $4k trip at 37 turns out to have been $23k |
+| Emergency fund | Storms cannot be dodged, and savings absorb them | The same $2k car repair is nothing with savings and a problem without them |
+| High-interest debt | The overflow goes on a card at 24%. The card drags the ball, and yearly saving pays it first | Debt is felt in the hands: steering turns slow, and saving stops until the card is gone |
+| Earning and saving more | Blue flags raise yearly saving, and an employer match is free money | A flag taken at 25 keeps paying for 42 years |
+| Balance | Mood falls every year without a treat. At zero you burn out and splurge $3k with no joy | Saving everything is not the answer either |
+| Spending with intent | A treat's joy depends on how worn down you are, not on its price | Sneakers when you are exhausted beat a car when you are fine |
+| Lifestyle creep | The ball touches things first, and it keeps growing | The richer you are, the harder it is to avoid spending |
+| Enough is a goal | Security counts up to a $300k nest egg (about $12k a year at the 4% rule) and nothing past it | "You could have enjoyed more" |
 
-## Team and tools
+**The score rewards a plan, not hoarding.** Six ways to live, measured with the game's own money model (saving $3k a year, no skills, no storms; pinned in `tests/econ.test.mjs`):
 
-Design Master Solutions LLC (USA), a software and design studio. HTML5 canvas and plain JavaScript, no engine,
-runs in any browser. Code written with an AI assistant (Claude); design, balance and testing by us.
+| **Way of living** | **Joy** | **Security** | **Score** |
+|-----------------------------------|------:|------:|------:|
+| Never treat yourself | 0 | 400 | 400 |
+| A $1k treat every 5 years | 193 | 400 | 593 |
+| A $1k treat every 2 years | 340 | 400 | 740 |
+| A $1k treat every year | 538 | 400 | **938** |
+| A $2k treat every year | 538 | 237 | 775 |
+| A $4k treat every year, more than you save | 538 | -400 | 138 |
+
+### What we hope players understand after playing
+
+1. Money invested early has the most years to grow. Saving $3k a year from 22 ends at $638k and from 32 at $334k: $30k less put in, $304k less at 67.
+2. An emergency fund is what keeps a storm from becoming high-interest debt.
+3. Card debt grows faster than savings, and it eats the money you meant to save.
+4. Enjoying life is part of the plan. Small, well-timed treats give as much joy as big ones, and a late treat costs far less future money than an early one.
+
+**Accuracy.** 6% is a long-run average for a diversified index fund, not a promise. 24% is a typical card APR. The model leaves out inflation and taxes so it stays readable, and the game is not financial advice. All of it is one file with no graphics (`econ.js`), with tests that check it teaches true things.
+
+**UAE and Arabic edition, built during the jam.** Same game, different money. Amounts are in AED at the 3.6725 peg. The snowball sits in a Sharia-compliant fund and earns profit, not interest. Zakat takes 2.5% of what you own once that reaches the nisab (fixed at AED 35k in the game, while the real figure moves with gold). It leaves the ball, but the score counts it at what it would have grown to, so giving never lowers your score, and players it does not apply to can turn it off. The UAE's end-of-service gratuity savings plan replaces the employer match. Cards cost about 3% a month. Treats and storms come from Gulf life: a weekend in Oman, Eid shopping and Eidiya, the rent deposit and agent fee, school fees rising, an AC breakdown in August.
+
+## 4. Visual Style & Player Experience
+
+| | | |
+|-----------------------|-----------------------|-----------------------|
+| ![Title card with the three editions and five accessibility settings](shots/title.jpg) | ![Retirement card with the score and the receipt](shots/receipt.jpg) | ![The UAE edition in Arabic, right to left](shots/arabic.jpg) |
+| Title card: editions and settings | At 67: the score and the receipt | UAE edition in Arabic, right to left |
+
+**Art direction.** A top-down winter slope, seen from above: a pixel-art skier and pines, gold slalom gates, blue flags, falling snow and a ski trail behind you. Everything is drawn in code, with no image files, so the whole game is about 50 KB and loads on a weak connection. The sky turns greyer as your mood falls.
+
+**Setting and tone.** Calm and forgiving. The skier has no name, gender or nationality, so the life on the slope can be anyone's. Nothing punishes you with a game over, and the final card says what happened without scolding.
+
+**Sound.** Short synthesized blips (WebAudio, no audio files). The game never depends on them: every sound has a visual twin, a short message with the same fact in a colour that also carries the meaning.
+
+**Interface.** One bar at the top shows age, savings, yearly saving, card debt, joy and mood. Treats, skills and storms differ by shape and text, not only by colour.
+
+**Accessibility, on the title and pause cards and saved on the device.** Large text (30% bigger), high contrast, Calm speed (30% slower, with the same money lessons), plain words ("card debt" becomes "borrowed"), and sound off. Keyboard, mouse and touch all play the whole game. Pausing stops everything, so the game can be read at any pace. A teacher can share the settings with a class by link.
+
+## 5. Development & Future Plans
+
+**In the prototype today.** A full life from 22 to 67 with four stages, gates, flags, storms, card debt, mood and burnout. A played tutorial, the score and the receipt. Three editions, five accessibility settings, pause and sound. Automated tests for the money model, the editions and the accessibility settings.
+
+**Not done yet.** The art and sound are prototype level, drawn and synthesized in code. No real learners have played it in a study. The Arabic was drafted with AI and checked in the game on a real device, but no native speaker has reviewed it. It runs only in the browser, and there are no teacher tools.
+
+### Priorities, in order
+
+The plan is six months and 1,000 hours, and the budget shows what ships at each funding level.
+
+1. Review of the Arabic and of the zakat and Sharia framing by a native speaker and an Islamic-finance adviser.
+2. Three rounds of playtests with learners aged 16 to 30, with before-and-after questions on the four lessons above.
+3. Classroom mode: a teacher view with no personal data, a 10-minute lesson plan and a printable debrief.
+4. iOS and Android release, tested on low-end phones.
+5. More life events and three life paths, original art (including desert and city slopes) and original music.
+
+### Risks, and what we do about them
+
+| **Risk** | **Our answer** |
+|----------------------------------|---------------------------------------------------------------|
+| Players enjoy it but do not learn | Before-and-after questions from the first playtest, a playtest report, and design changes if the answers do not move |
+| A short run gets repetitive | More life events, life paths and slope themes come after the learning is proven |
+| An error of fact or culture in the UAE edition | Reviewed before any release outside the jam. The rules live in one file with its own tests |
+| Our record is apps, not games | Art and sound go to specialists, and every stage is checked with players |
+
+**Reaching players and paying for itself.** Players never pay: the web version stays free, with no ads and no data collected from them. Schools, banks, employers and public programs already pay for financial education, and they are who can sustain it, by licensing classroom mode and co-branded editions in their own currency, products and language. A new edition is mostly one data file (`region.js`), so adding a market stays cheap. We start in the UAE, where the edition already exists, and our other products already ship in Spanish and Portuguese, which are natural next editions. We have no customers or partners yet. Those conversations start once classroom mode exists.
+
+## 6. Your Team
+
+**Alan De Bortolo, Design Master Solutions LLC (Massachusetts, USA).** Solo entry: game design, the numbers, testing and production. The code and the first draft of the Arabic were written with an AI assistant (Claude), as stated on the game's page. The design, the balance, the numbers and the tests on real devices are ours.
+
+**Relevant experience.** The studio designs, codes, hosts and supports its own software products (Stone Project is live on iOS, Android, Mac, Windows and the web) and builds iOS and Android apps for clients, so store releases, support and localization are everyday work. Alan also builds LAPI, a personal and family finance app in Brazil (lapiapp.com), so how people really handle money is familiar ground.
+
+**Support we would bring in.** A native Arabic speaker and an Islamic-finance adviser, a pixel artist, a composer, and teachers to shape classroom mode. All of it is in the budget.

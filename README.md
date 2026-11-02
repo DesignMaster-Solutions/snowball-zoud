@@ -4,7 +4,7 @@ A financial literacy game for [Zoud GameLab](https://itch.io/jam/zoud-gamelab) (
 
 Play: https://designmaster-solutions.github.io/snowball-zoud/ (attract mode: `?autoplay`)
 
-Gameplay video on YouTube: https://youtu.be/s3qtXGRBc7I (2:00, the submitted build 0.5: a full life in the Global edition, then the UAE edition in Arabic from 1:26; recorded from the game with `?autoplay&record&edition=global|uae-ar`, which waits for a tap and POSTs one webm with sound to `/upload`; 3 s title cards from screenshots of the same build): [docs/gameplay-v5.mp4](docs/gameplay-v5.mp4). Earlier cuts: 0.3 https://youtu.be/9qOFznEEHeY , 0.2 https://youtu.be/YimCBSvBMxg
+Gameplay video on YouTube: https://youtu.be/s3qtXGRBc7I (1:59, the submitted build 0.5: a full life in the Global edition, then the UAE edition in Arabic from 1:26; recorded from the game with `?autoplay&record&edition=global|uae-ar`, which waits for a tap and POSTs one webm with sound to `/upload`; 3 s title cards from screenshots of the same build): [docs/gameplay-v5.mp4](docs/gameplay-v5.mp4). Earlier cuts: 0.3 https://youtu.be/9qOFznEEHeY , 0.2 https://youtu.be/YimCBSvBMxg
 
 For the jury: [concept doc](docs/CONCEPT.md) ([PDF](docs/CONCEPT.pdf)) · [game budget](docs/BUDGET.md) ([PDF](docs/BUDGET.pdf)) · itch page: https://designmastersolutions.itch.io/snowball
 
@@ -24,7 +24,7 @@ gets bigger on its own, and faster the bigger it is. That is compound growth, fe
 
 Score = joy along the way + security: the nest egg counts up to a $300k goal (about $12k/yr at the 4% rule) and
 nothing past it, so hoarding scores the same as just reaching enough, and retiring in card debt scores negative.
-Measured in `tests/econ.test.mjs`: never treating 400, a treat every few years 590-740, treating every year 138. At retirement the game prints a receipt of your priciest treat
+Measured in `tests/econ.test.mjs`, saving $3k a year: never treating 400, a $1k treat every 2 to 5 years 593-740, a $1k treat every year 938, a $4k treat every year (more than you save) 138. At retirement the game prints a receipt of your priciest treat
 in future money ("Beach vacation at 25: $4k then, $46k at 67; the same trip at 60: $6k").
 
 ## What players learn by playing

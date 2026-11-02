@@ -100,6 +100,11 @@ console.log('econ ok');
   const miser = life(0), balanced = life(5, 1), spender = life(1, 4);
   assert.ok(balanced > miser, `balanced ${balanced} vs miser ${miser}`);
   assert.ok(balanced > spender, `balanced ${balanced} vs spender ${spender}`);
+  // The table printed in docs/CONCEPT.md, section 3: change the model and this says the document is now wrong.
+  assert.deepEqual([life(0), life(5, 1), life(2, 1), life(1, 1), life(1, 2), life(1, 4)], [400, 593, 740, 938, 775, 138]);
+  // The start-early figures in the same section: $3k a year from 22 and from 32.
+  const saved = (start) => { const s = E.newLife(); while (s.age < E.END_AGE) { s.contribution = s.age >= start ? 3 : 0; E.tickYear(s); } return Math.round(s.savings); };
+  assert.deepEqual([saved(22), saved(32)], [638, 334]);
 }
 
 // Life stages: temptations and storms change with age, and every age maps to a stage.

@@ -157,7 +157,7 @@ function update(dt) {
     const stage = ED.stageAt(life.age);
     if (stage.from === life.age) toast(ED.t('stageToast', { age: life.age, stage: stage.name }), '#e0e7ff');
     if (life.mood <= 0) { blip([220, 165, 131], 'square', 0.25); E.spend(life, 3, 'Burnout splurge', 'burnout'); toast(ED.t('burnout', { x: money(3) }), '#ff9f43'); }
-    if (life.age >= E.END_AGE) { phase = 'end'; objs = []; blip([523, 659, 784, 1047], 'sine', 0.4); if (rec) setTimeout(() => rec.state === 'recording' && rec.stop(), 7000); }
+    if (life.age >= E.END_AGE) { phase = 'end'; objs = []; toasts = []; blip([523, 659, 784, 1047], 'sine', 0.4); if (rec) setTimeout(() => rec.state === 'recording' && rec.stop(), 7000); }
   }
   for (const t of toasts) t.t += dt;
   toasts = toasts.filter(t => t.t < 2.6);
