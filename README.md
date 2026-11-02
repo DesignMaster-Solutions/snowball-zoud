@@ -4,7 +4,7 @@ A financial literacy game for [Zoud GameLab](https://itch.io/jam/zoud-gamelab) (
 
 Play: https://designmaster-solutions.github.io/snowball-zoud/ (attract mode: `?autoplay`)
 
-Gameplay video on YouTube: https://youtu.be/9qOFznEEHeY (84 s, build 0.3 with the life stages and the employer match, recorded from the game with `?autoplay&record`, which waits for a tap and POSTs one webm with sound to `/upload`; 4 s title card from a screenshot of the same build): [docs/gameplay-v3.mp4](docs/gameplay-v3.mp4). Previous 0.2 cut: https://youtu.be/YimCBSvBMxg
+Gameplay video on YouTube: https://youtu.be/s3qtXGRBc7I (2:00, the submitted build 0.5: a full life in the Global edition, then the UAE edition in Arabic from 1:26; recorded from the game with `?autoplay&record&edition=global|uae-ar`, which waits for a tap and POSTs one webm with sound to `/upload`; 3 s title cards from screenshots of the same build): [docs/gameplay-v5.mp4](docs/gameplay-v5.mp4). Earlier cuts: 0.3 https://youtu.be/9qOFznEEHeY , 0.2 https://youtu.be/YimCBSvBMxg
 
 For the jury: [concept doc](docs/CONCEPT.md) ([PDF](docs/CONCEPT.pdf)) · [game budget](docs/BUDGET.md) ([PDF](docs/BUDGET.pdf)) · itch page: https://designmastersolutions.itch.io/snowball
 
