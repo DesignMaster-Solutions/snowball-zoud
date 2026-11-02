@@ -1,6 +1,6 @@
 # Snowball
 
-**Game Concept Document** for Zoud GameLab 2026, theme: Make FinLit Fun. Describes build 0.5, the one submitted.
+**Game Concept Document** for Zoud GameLab 2026, theme: Make FinLit Fun. Describes the submitted build.
 
 [Play in the browser](https://designmaster-solutions.github.io/snowball-zoud/) · [Arabic edition](https://designmaster-solutions.github.io/snowball-zoud/?edition=uae-ar) · [2-minute gameplay video](https://youtu.be/s3qtXGRBc7I) · [Game budget (separate document)](https://designmaster-solutions.github.io/snowball-zoud/docs/BUDGET.pdf) · [Source code](https://github.com/DesignMaster-Solutions/snowball-zoud)
 
