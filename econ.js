@@ -5,7 +5,7 @@ export const START_AGE = 22;
 export const END_AGE = 67;
 export const GROWTH = 0.06;   // long-run average yearly return of a diversified index fund, not a promise
 export const DEBT_APR = 0.24; // typical credit card APR
-export const GOAL = 300;          // $k nest egg at 67: ~$12k/yr on top of a pension at the 4% withdrawal rule
+export const GOAL = 800;          // $k nest egg at 67: ~$32k/yr on top of a pension at the 4% withdrawal rule; blue flags make it reachable, every gate does not
 export const SECURITY_POINTS = 400; // reaching GOAL is worth about as much joy as a life of well-timed treats
 
 export function newLife() {
@@ -56,9 +56,9 @@ export function futureValue(cost, age) {
   return cost * Math.pow(1 + GROWTH, END_AGE - age);
 }
 
-// Joy depends on when you treat yourself, not on the price: treats matter most when you are worn down.
+// Joy depends on when you treat yourself, not on the price: a treat when you are fine adds almost nothing, one when you are worn down adds the most.
 export function treatJoy(mood) {
-  return Math.round(10 + 20 * (1 - mood));
+  return Math.round(2 + 28 * (1 - mood));
 }
 
 // Zakat due this year: a share of what you own (savings minus debt) once it reaches the nisab, nothing below it.

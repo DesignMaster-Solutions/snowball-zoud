@@ -100,8 +100,10 @@ console.log('econ ok');
   const miser = life(0), balanced = life(5, 1), spender = life(1, 4);
   assert.ok(balanced > miser, `balanced ${balanced} vs miser ${miser}`);
   assert.ok(balanced > spender, `balanced ${balanced} vs spender ${spender}`);
+  // Restraint pays: the same $1k treat every 5 years beats one every year (0.5.2 scored them 593 vs 938).
+  assert.ok(balanced > life(1, 1), `every 5 years ${balanced} vs every year ${life(1, 1)}`);
   // The table printed in docs/CONCEPT.md, section 3: change the model and this says the document is now wrong.
-  assert.deepEqual([life(0), life(5, 1), life(2, 1), life(1, 1), life(1, 2), life(1, 4)], [400, 593, 740, 938, 775, 138]);
+  assert.deepEqual([life(0), life(5, 1), life(2, 1), life(1, 1), life(1, 2), life(1, 4)], [275, 462, 460, 427, 311, -178]);
   // The start-early figures in the same section: $3k a year from 22 and from 32.
   const saved = (start) => { const s = E.newLife(); while (s.age < E.END_AGE) { s.contribution = s.age >= start ? 3 : 0; E.tickYear(s); } return Math.round(s.savings); };
   assert.deepEqual([saved(22), saved(32)], [638, 334]);

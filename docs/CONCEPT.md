@@ -50,37 +50,37 @@ There is no lesson screen during play: one short rules card before you start and
 |---------------|-----------------------------|------------------------------------|
 | Compound growth | The ball grows 6% a year by itself | Slow at first, then it swells: $47k at 33 and $685k at 62 in the run in our video |
 | Opportunity cost | A treat leaves the ball, and the receipt prices it in money at 67 | A $4k trip at 37 turns out to have been $23k |
-| Emergency fund | Storms cannot be dodged, and savings absorb them | The same $2k car repair is nothing with savings and a problem without them |
+| Emergency fund | Storms cannot be dodged, and savings absorb them | The tutorial's $12k car accident at 25 is bigger than anyone's savings, so every player meets the card once; later storms only hurt a player who spent the reserve |
 | High-interest debt | The overflow goes on a card at 24%. The card drags the ball, and yearly saving pays it first | If you overspend early, debt is felt in the hands: steering turns slow, and saving stops until the card is gone |
 | Earning and saving more | Blue flags raise yearly saving, and an employer match is free money | A flag taken at 25 keeps paying for 42 years |
 | Balance | Mood falls every year without a treat. At zero you burn out and splurge $3k with no joy | Saving everything is not the answer either |
-| Spending with intent | A treat's joy depends on how worn down you are, not on its price | Sneakers when you are exhausted beat a car when you are fine |
+| Spending with intent | A treat's joy depends on how worn down you are, not on its price: 2 points when you are fine, up to 30 when you are worn out | Sneakers when you are exhausted beat a car when you are fine |
 | Lifestyle creep | Treats get pricier with age, and the growing ball leaves less room around each gate | Wanting more comes with earning more |
-| Enough is a goal | Security counts up to a $300k nest egg (about $12k a year at the 4% rule) and nothing past it | "You could have enjoyed more" |
+| Enough is a goal | Security counts up to an $800k nest egg (about $32k a year at the 4% rule) and nothing past it | "You could have enjoyed more" |
 
 **The score punishes hoarding and overspending.** Six ways to live, measured with the game's own money model (saving $3k a year, no skills, no storms; pinned in `tests/econ.test.mjs`):
 
 | **Way of living** | **Joy** | **Security** | **Score** |
 |-----------------------------------|------:|------:|------:|
-| Never treat yourself | 0 | 400 | 400 |
-| A $1k treat every 5 years | 193 | 400 | 593 |
-| A $1k treat every 2 years | 340 | 400 | 740 |
-| A $1k treat every year | 538 | 400 | **938** |
-| A $2k treat every year | 538 | 237 | 775 |
-| A $4k treat every year, more than you save | 538 | -400 | 138 |
+| Never treat yourself | 0 | 275 | 275 |
+| A $1k treat every 5 years | 164 | 298 | **462** |
+| A $1k treat every 2 years | 200 | 260 | 460 |
+| A $1k treat every year | 222 | 205 | 427 |
+| A $2k treat every year | 222 | 89 | 311 |
+| A $4k treat every year, more than you save | 222 | -400 | -178 |
 
-In the full game, blue flags raise saving to about $12k a year, so most lives pass the goal and joy decides the score. In 300 simulated lives per strategy (robots, not people), hoarding scores about 480, not steering about 680, and taking every flag and gate about 970, and a player who takes flags almost never meets the card. Rebalancing this, so that restraint pays and every player meets the card once, is our next design step.
+In the full game, blue flags raise saving to about $12k a year. In 100 simulated lives per strategy (robots, not people, global edition, build 0.6), taking the flags and only the gates under $2k scores about 590 and taking the flags and treating only when mood runs low about 565, while hoarding scores about 465, taking every flag and gate about 435, never steering about 425, and taking every gate while dodging the flags about 230. Every life meets the card once, in the tutorial, and the yearly saving clears it within about a year; the player who takes every gate and skips the flags carries it for about four.
 
 ### What we hope players understand after playing
 
 1. Money invested early has the most years to grow. Saving $3k a year from 22 ends at $638k and from 32 at $334k: $30k less put in, $304k less at 67.
 2. An emergency fund is what keeps a storm from becoming high-interest debt.
 3. Card debt grows faster than savings, and it eats the money you meant to save.
-4. Enjoying life is part of the plan. Small, frequent treats give as much joy as big ones, and a late treat costs far less future money than an early one.
+4. Enjoying life is part of the plan. A cheap treat gives as much joy as an expensive one, a treat when you are worn down gives the most, and a late treat costs far less future money than an early one.
 
 Each lesson maps to something a first salary can do: start saving now, keep a small emergency fund, clear the card before investing, and plan for small treats.
 
-**Accuracy.** 6% is a long-run average for a diversified index fund, not a promise. 24% is a typical card APR. The model leaves out inflation and taxes so it stays readable, the ball never falls with the market, and the card has no limit. $300k is a game target on top of a pension, not a retirement recommendation, and the game is not financial advice. The core rules are one file with no graphics (`econ.js`), and prices and editions a second one (`region.js`), both with tests.
+**Accuracy.** 6% is a long-run average for a diversified index fund, not a promise. 24% is a typical card APR. The model leaves out inflation and taxes so it stays readable, the ball never falls with the market, and the card has no limit. $800k is a game target on top of a pension, not a retirement recommendation, and the game is not financial advice. The core rules are one file with no graphics (`econ.js`), and prices and editions a second one (`region.js`), both with tests.
 
 **UAE and Arabic edition, built during the jam.** Same game, different money. Treats and storms are priced in dirhams for Gulf life, not converted from dollars. Saving, skills and the goal convert at the 3.6725 peg. The snowball sits in a Sharia-compliant fund and earns profit, not interest. Zakat takes 2.5% of what you own once that reaches the nisab (fixed at AED 35k in the game, while the real figure moves with gold). It leaves the ball, but the score counts it at what it would have grown to, so the money you give still counts in your score, and players it does not apply to can turn it off. The UAE's end-of-service gratuity savings plan replaces the employer match. Cards cost about 3% a month. Treats and storms come from Gulf life: a weekend in Oman, Eid shopping and Eidiya, the rent deposit and agent fee, school fees rising, an AC breakdown in August.
 

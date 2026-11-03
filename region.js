@@ -104,7 +104,7 @@ export const STR = {
     uae: 'Savings pay for storms. What they cannot pay goes on a card at ~3% a month',
     ar: 'المدخرات تدفع ثمن العواصف، وما لا تغطّيه يذهب إلى البطاقة بنحو 3% شهرياً' },
   introWant: { global: 'Concert', ar: 'حفلة موسيقية' },
-  introStorm: { global: 'Car repair', ar: 'تصليح السيارة' },
+  introStorm: { global: 'Car accident', ar: 'حادث سيارة' },
   stormBorrowed: { global: '{label} {cost}: {borrowed} on the card at 24%', uae: '{label} {cost}: {borrowed} on the card at ~3% a month',
     ar: '{label} {cost}: {borrowed} على البطاقة بنحو 3% شهرياً' },
   stormCovered: { global: '{label} {cost}: covered by savings', ar: '{label} {cost}: غطّتها المدخرات' },
@@ -169,5 +169,5 @@ export function edition(id) {
     : GLOBAL_STAGES.map(s => ({ ...s, name: s.name[0] }));
   const stageAt = (age) => { let st = stages[0]; for (const s of stages) if (age >= s.from) st = s; return st; };
   return { id, uae, ar, lang, rtl: ar, factor, t, money, stages, stageAt, apr: uae ? UAE_CARD_APR : undefined, hasZakat: uae,
-    introWantCost: uae ? 0.5 / AED_PER_USD : 1, introStormCost: uae ? 7 / AED_PER_USD : 2 };
+    introWantCost: uae ? 0.5 / AED_PER_USD : 1, introStormCost: uae ? 45 / AED_PER_USD : 12 }; // bigger than anyone's savings at 25: every player meets the card once
 }

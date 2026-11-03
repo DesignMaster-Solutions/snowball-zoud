@@ -22,7 +22,7 @@ gets bigger on its own, and faster the bigger it is. That is compound growth, fe
 - **Mood** drops every year without a treat. At zero you burn out and splurge $3k anyway, with no joy: saving everything is not the
   answer either.
 
-Score = joy along the way + security: the nest egg counts up to a $300k goal (about $12k/yr at the 4% rule) and
+Score = joy along the way + security: the nest egg counts up to an $800k goal (about $32k/yr at the 4% rule) and
 nothing past it, so hoarding scores the same as just reaching enough, and retiring in card debt scores negative.
 Measured in `tests/econ.test.mjs`, saving $3k a year: never treating 400, a $1k treat every 2 to 5 years 593-740, a $1k treat every year 938, a $4k treat every year (more than you save) 138. At retirement the game prints a receipt of your priciest treat
 in future money ("Beach vacation at 25: $4k then, $46k at 67; the same trip at 60: $6k").
