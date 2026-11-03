@@ -4,7 +4,7 @@ A financial literacy game for [Zoud GameLab](https://itch.io/jam/zoud-gamelab) (
 
 Play: https://designmaster-solutions.github.io/snowball-zoud/ (attract mode: `?autoplay`)
 
-Gameplay video on YouTube: https://youtu.be/s3qtXGRBc7I (1:59, the submitted build 0.5: a full life in the Global edition, then the UAE edition in Arabic from 1:26; recorded from the game with `?autoplay&record&edition=global|uae-ar`, which waits for a tap and POSTs one webm with sound to `/upload`; 3 s title cards from screenshots of the same build): [docs/gameplay-v5.mp4](docs/gameplay-v5.mp4). Earlier cuts: 0.3 https://youtu.be/9qOFznEEHeY , 0.2 https://youtu.be/YimCBSvBMxg
+Gameplay video on YouTube: https://youtu.be/YU_MAHViJfc (2:00, the submitted build 0.6: a full life in the Global edition, then the UAE edition in Arabic from 1:20; recorded on a Galaxy S25 from the game with `?autoplay&record&edition=global|uae-ar`, which waits for a tap and POSTs one webm with sound to `/upload`; 3 s title cards from screenshots of the same build): [docs/gameplay-v6.mp4](docs/gameplay-v6.mp4). Earlier cuts: 0.5 https://youtu.be/s3qtXGRBc7I , 0.3 https://youtu.be/9qOFznEEHeY , 0.2 https://youtu.be/YimCBSvBMxg
 
 For the jury: [concept doc](docs/CONCEPT.md) ([PDF](docs/CONCEPT.pdf)) · [game budget](docs/BUDGET.md) ([PDF](docs/BUDGET.pdf)) · itch page: https://designmastersolutions.itch.io/snowball
 
@@ -54,7 +54,7 @@ Gulf time zone opens the UAE edition; the choice is saved on the device.
 
 What changes in the UAE editions, and why (all in `region.js`, checked by `tests/region.test.mjs`):
 
-- **Dirhams.** Every amount is shown in AED at the 3.6725 peg; the goal is AED 1.1M at 67. The model still runs in one
+- **Dirhams.** Every amount is shown in AED at the 3.6725 peg; the goal is AED 2.94M at 67. The model still runs in one
   currency, so the balance and the lessons are the same in every edition.
 - **Profit, not interest.** The snowball sits in a Sharia-compliant fund and grows about 6% a year from profit. Borrowing
   is still priced honestly: UAE cards charge about 3% a month, so a storm that savings cannot cover goes on the card at

@@ -2,9 +2,9 @@
 
 **Game Concept Document** for Zoud GameLab 2026, theme: Make FinLit Fun. Describes the submitted build.
 
-[Play in the browser](https://designmaster-solutions.github.io/snowball-zoud/) · [Arabic edition](https://designmaster-solutions.github.io/snowball-zoud/?edition=uae-ar) · [2-minute gameplay video](https://youtu.be/s3qtXGRBc7I) · [Game budget (separate document)](https://designmaster-solutions.github.io/snowball-zoud/docs/BUDGET.pdf) · [Source code](https://github.com/DesignMaster-Solutions/snowball-zoud)
+[Play in the browser](https://designmaster-solutions.github.io/snowball-zoud/) · [Arabic edition](https://designmaster-solutions.github.io/snowball-zoud/?edition=uae-ar) · [2-minute gameplay video](https://youtu.be/YU_MAHViJfc) · [Game budget (separate document)](https://designmaster-solutions.github.io/snowball-zoud/docs/BUDGET.pdf) · [Source code](https://github.com/DesignMaster-Solutions/snowball-zoud)
 
-![Age 62: the savings snowball has grown to $685k and passes a gold gate, a treat that would come out of it](shots/hero.jpg)
+![Age 63: the savings snowball has grown to $696k and passes gold gates, treats that would come out of it](shots/hero.jpg)
 
 ## 1. Game Overview
 
@@ -48,7 +48,7 @@ There is no lesson screen during play: one short rules card before you start and
 
 | **Concept** | **The mechanic** | **What the player lives through** |
 |---------------|-----------------------------|------------------------------------|
-| Compound growth | The ball grows 6% a year by itself | Slow at first, then it swells: $47k at 33 and $685k at 62 in the run in our video |
+| Compound growth | The ball grows 6% a year by itself | Slow at first, then it swells: $38k at 33 and $646k at 62 in the run in our video |
 | Opportunity cost | A treat leaves the ball, and the receipt prices it in money at 67 | A $4k trip at 37 turns out to have been $23k |
 | Emergency fund | Storms cannot be dodged, and savings absorb them | The tutorial's $12k car accident at 25 is bigger than anyone's savings, so every player meets the card once; later storms only hurt a player who spent the reserve |
 | High-interest debt | The overflow goes on a card at 24%. The card drags the ball, and yearly saving pays it first | If you overspend early, debt is felt in the hands: steering turns slow, and saving stops until the card is gone |
